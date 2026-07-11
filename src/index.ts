@@ -104,8 +104,23 @@ async function main() {
     res.status(500).json({ error: "Internal error." });
   });
 
+  // Never let a stray async rejection (e.g. a transient facilitator hiccup) kill
+  // the process — log it and stay up. pm2 handles genuine fatal exits.
+  process.on("unhandledRejection", (reason) => {
+    console.error("[server] unhandledRejection:", reason instanceof Error ? reason.message : reason);
+  });
+
   const server = app.listen(PORT, async () => {
-    if (paymentLayer) await paymentLayer.initialize(); // required after listen()
+    if (paymentLayer) {
+      try {
+        await paymentLayer.initialize(); // load supported payment kinds from the facilitator
+        console.log("[payments] facilitator initialized");
+      } catch (e) {
+        // Keep serving (health/demo stay up); payments recover when the
+        // facilitator is reachable again. Do not crash-loop.
+        console.error("[payments] facilitator init failed:", e instanceof Error ? e.message : e);
+      }
+    }
     console.log(`Scam Shield on :${PORT}  (payments: ${PAYMENTS_ENABLED ? "on / x402" : "off / dev"})`);
   });
 

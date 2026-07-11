@@ -4,20 +4,15 @@ import { loadPaymentConfig, assertPaymentConfig, NETWORK } from "./config.js";
 /**
  * Builds the OKX x402 payment layer for a single A2MCP route.
  *
- * Uses the official OKX Payment SDK (github.com/okx/payments):
- *   @okxweb3/x402-core   — OKXFacilitatorClient, x402ResourceServer, x402HTTPResourceServer
- *   @okxweb3/x402-evm    — ExactEvmScheme (pay-per-call)
- *   @okxweb3/x402-express— paymentMiddlewareFromHTTPServer
+ * Uses the official OKX Payment SDK (github.com/okx/payments). Export names
+ * VERIFIED against the installed packages (2026-07-12):
+ *   @okxweb3/x402-core    — OKXFacilitatorClient
+ *   @okxweb3/x402-express — x402ResourceServer, x402HTTPResourceServer, paymentMiddlewareFromHTTPServer
+ *   @okxweb3/x402-evm     — ExactEvmScheme (top-level export; pay-per-call)
  *
  * The SDK is loaded via dynamic import so dev mode (PAYMENTS_ENABLED=false)
- * runs with zero OKX dependencies. Specifiers are cast to `string` so the
- * compiler treats them as opaque runtime imports (no build-time type errors
- * before the packages are installed).
- *
- * ⚠️ VERIFY EXPORT NAMES before go-live: open `typescript/SELLER.md` in the
- * okx/payments repo and confirm the three export names + the ExactEvmScheme
- * import path below still match the installed package versions. If they differ,
- * this file is the only thing to change.
+ * runs without touching the OKX packages. Specifiers are cast to `string` so
+ * the compiler treats them as opaque runtime imports.
  */
 
 export interface PaymentLayer {
@@ -32,8 +27,8 @@ export async function createPaymentLayer(routeKey: string): Promise<PaymentLayer
   assertPaymentConfig(cfg);
 
   const core: any = await import(("@okxweb3/x402-core") as string);
-  const evm: any = await import(("@okxweb3/x402-evm/exact/server") as string);
-  const expressPkg: any = await import(("@okxweb3/x402-express") as string);
+  const evm: any = await import(("@okxweb3/x402-evm") as string);
+  const srv: any = await import(("@okxweb3/x402-express") as string);
 
   const facilitatorClient = new core.OKXFacilitatorClient({
     apiKey: cfg.okx.apiKey,
@@ -43,12 +38,12 @@ export async function createPaymentLayer(routeKey: string): Promise<PaymentLayer
     syncSettle: true, // confirm settlement on-chain before we deliver the verdict
   });
 
-  const resourceServer = new core.x402ResourceServer(facilitatorClient).register(
+  const resourceServer = new srv.x402ResourceServer(facilitatorClient).register(
     NETWORK,
     new evm.ExactEvmScheme(),
   );
 
-  const httpServer = new core.x402HTTPResourceServer(resourceServer, {
+  const httpServer = new srv.x402HTTPResourceServer(resourceServer, {
     [routeKey]: {
       accepts: {
         scheme: "exact",
@@ -60,8 +55,11 @@ export async function createPaymentLayer(routeKey: string): Promise<PaymentLayer
     },
   });
 
+  // 4th arg `syncFacilitatorOnStart=false`: disable the SDK's fire-and-forget
+  // background facilitator sync (its rejection is uncatchable and can crash the
+  // process). We run initialize() ourselves, guarded, from index.ts.
   return {
-    middleware: expressPkg.paymentMiddlewareFromHTTPServer(httpServer),
+    middleware: srv.paymentMiddlewareFromHTTPServer(httpServer, undefined, undefined, false),
     initialize: () => resourceServer.initialize(),
   };
 }
