@@ -13,21 +13,33 @@ export const CHAIN_ID = 196;
 
 /** USDT0 on X Layer (SDK default). 6 decimals, gasless via EIP-3009. */
 export const USDT0_ADDRESS = "0x779Ded0c9e1022225f8E0630b35a9b54bE713736";
+export const USDT0_DECIMALS = 6;
 
 export interface PaymentConfig {
   enabled: boolean;
   payTo: string;
-  /** Price accepted by the SDK: "$0.05" | 0.05 | { asset, amount } */
-  price: string;
+  /**
+   * Explicit atomic price: { amount, asset }. We resolve the token + atomic
+   * amount ourselves rather than passing a "$0.02" USD string, because the USD
+   * form makes the SDK call a scheme-side price parser that ExactEvmScheme
+   * doesn't implement (→ "parsePrice is not a function").
+   */
+  price: { amount: string; asset: string };
   maxTimeoutSeconds: number;
   okx: { apiKey: string; secretKey: string; passphrase: string; baseUrl?: string };
+}
+
+/** "$0.02" | "0.02" → atomic USDT0 units ("20000"). */
+function toAtomic(price: string, decimals: number): string {
+  const decimal = Number(String(price).replace(/[^0-9.]/g, "")) || 0;
+  return BigInt(Math.round(decimal * 10 ** decimals)).toString();
 }
 
 export function loadPaymentConfig(): PaymentConfig {
   return {
     enabled: process.env.PAYMENTS_ENABLED === "true",
     payTo: process.env.PAY_TO_ADDRESS ?? "",
-    price: process.env.PRICE ?? "$0.02",
+    price: { amount: toAtomic(process.env.PRICE ?? "0.02", USDT0_DECIMALS), asset: USDT0_ADDRESS },
     maxTimeoutSeconds: Number(process.env.MAX_TIMEOUT_SECONDS ?? 300),
     okx: {
       apiKey: process.env.OKX_API_KEY ?? "",
