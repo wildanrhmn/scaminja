@@ -8,7 +8,8 @@ import { loadPaymentConfig, assertPaymentConfig, NETWORK } from "./config.js";
  * VERIFIED against the installed packages (2026-07-12):
  *   @okxweb3/x402-core    — OKXFacilitatorClient
  *   @okxweb3/x402-express — x402ResourceServer, x402HTTPResourceServer, paymentMiddlewareFromHTTPServer
- *   @okxweb3/x402-evm     — ExactEvmScheme (top-level export; pay-per-call)
+ *   @okxweb3/x402-evm/exact/server — ExactEvmScheme (the SERVER scheme, which
+ *       implements parsePrice; the top-level ExactEvmScheme is the CLIENT class)
  *
  * The SDK is loaded via dynamic import so dev mode (PAYMENTS_ENABLED=false)
  * runs without touching the OKX packages. Specifiers are cast to `string` so
@@ -27,7 +28,7 @@ export async function createPaymentLayer(routeKey: string): Promise<PaymentLayer
   assertPaymentConfig(cfg);
 
   const core: any = await import(("@okxweb3/x402-core") as string);
-  const evm: any = await import(("@okxweb3/x402-evm") as string);
+  const evm: any = await import(("@okxweb3/x402-evm/exact/server") as string);
   const srv: any = await import(("@okxweb3/x402-express") as string);
 
   const facilitatorClient = new core.OKXFacilitatorClient({
