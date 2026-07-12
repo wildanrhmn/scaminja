@@ -50,10 +50,14 @@ export function checkBrand(host: string): Evidence[] {
     if (brand.domains.includes(reg)) return []; // it IS the official brand (or a real subdomain) — benign
     const brandSld = brand.domains[0].split(".")[0];
 
-    // Typosquat: look-alike of the official domain (paypa1, arnazon, g00gle)
-    const dist = levenshtein(sld, brandSld);
-    if (sld !== brandSld && dist > 0 && dist <= 2 && Math.abs(sld.length - brandSld.length) <= 2) {
-      return [{ claim: `Domain "${reg}" is a look-alike of ${brand.name} (${brand.domains[0]})`, source: "typosquat check", kind: "verified", severity: "high", subject: host }];
+    // Typosquat: look-alike of the official name (paypa1, arnazon, g00gle) —
+    // check the whole SLD and each hyphen-separated part (paypa1-secure → paypa1).
+    const candidates = [sld, ...sld.split("-")].filter((c) => c.length >= 4);
+    for (const cand of candidates) {
+      const dist = levenshtein(cand, brandSld);
+      if (cand !== brandSld && dist > 0 && dist <= 2 && Math.abs(cand.length - brandSld.length) <= 2) {
+        return [{ claim: `Domain "${reg}" is a look-alike of ${brand.name} (${brand.domains[0]})`, source: "typosquat check", kind: "verified", severity: "high", subject: host }];
+      }
     }
     // Impersonation: brand name as a whole label/word anywhere in the host
     // (bounded by start/end or a . / - separator) — avoids "applepie" false hits.
