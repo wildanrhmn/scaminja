@@ -81,28 +81,35 @@ const OPTS = [
   {id:"blade", name:"Blade Ninja", sub:"Deep hood, crimson headband with a shuriken plate, sharp blue eyes. The classic determined ninja.",
     hoodA:"#182036", hoodB:"#0b0f1c", rim:"#6f8dff", band:"#ff4d6d", bandB:"#c9304e", eye:"#eaf0ff", glow:"#6f8dff", plate:true},
 ];
-let selected = OPTS[0].id;
+let selected = OPTS[1].id; // shadow
 
 function ninja(o,uid){
   return `
   <defs>
     <linearGradient id="hood-${uid}" x1="0" y1="0" x2="0.35" y2="1"><stop offset="0%" stop-color="${o.hoodA}"/><stop offset="100%" stop-color="${o.hoodB}"/></linearGradient>
+    <linearGradient id="robe-${uid}" x1="0" y1="0.5" x2="0" y2="1"><stop offset="0%" stop-color="${o.hoodB}"/><stop offset="100%" stop-color="#080b13"/></linearGradient>
     <linearGradient id="band-${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${o.band}"/><stop offset="100%" stop-color="${o.bandB}"/></linearGradient>
-    <radialGradient id="eye-${uid}" cx="0.4" cy="0.35" r="0.8"><stop offset="0%" stop-color="${o.eye}"/><stop offset="100%" stop-color="${o.glow}"/></radialGradient>
-    <filter id="soft-${uid}" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.4"/></filter>
+    <radialGradient id="eye-${uid}" cx="0.4" cy="0.35" r="0.85"><stop offset="0%" stop-color="${o.eye}"/><stop offset="100%" stop-color="${o.glow}"/></radialGradient>
+    <filter id="soft-${uid}" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.6"/></filter>
   </defs>
-  <path d="M15 108 C19 88 40 82 50 82 C60 82 81 88 85 108 Z" fill="${o.hoodB}"/>
-  <path d="M50 6 C69 6 83 19 85 39 C86 52 83 63 74 73 C67 81 59 86 50 86 C41 86 33 81 26 73 C17 63 14 52 15 39 C17 19 31 6 50 6 Z" fill="url(#hood-${uid})"/>
-  <path d="M50 6 C41 6 33 9 27 15 C22 20 18 28 16.5 38" fill="none" stroke="${o.rim}" stroke-opacity="0.55" stroke-width="1.6" stroke-linecap="round"/>
-  <path d="M15 41 C33 34 67 34 85 41 L85 48.5 C67 41.5 33 41.5 15 48.5 Z" fill="url(#band-${uid})"/>
-  <path d="M83.5 44 C96 45 104 51 100 60 C96 53 90 49 82 48.5 Z" fill="${o.bandB}"/>
-  <path d="M83 47.5 C95 53 101 62 96 69 C93 60 88 53 81 51.5 Z" fill="${o.band}"/>
-  ${o.plate?`<rect x="43.5" y="36.2" width="13" height="9.4" rx="2.6" fill="#0b0e17"/><path d="M50 37.6 l1.5 2.9 2.9 1.5 -2.9 1.5 -1.5 2.9 -1.5 -2.9 -2.9 -1.5 2.9 -1.5 Z" fill="${o.rim}"/>`:""}
-  <path d="M22 47.5 C36 43 64 43 78 47.5 L78 58 C64 62 36 62 22 58 Z" fill="#070a12"/>
-  <g filter="url(#soft-${uid})" fill="${o.glow}" opacity="0.9"><ellipse cx="37" cy="53" rx="7.5" ry="4.2"/><ellipse cx="63" cy="53" rx="7.5" ry="4.2"/></g>
-  <path d="M29 54.5 C32.5 49.5 43 48.5 46.5 53 C43 56 32 56.5 29 54.5 Z" fill="url(#eye-${uid})"/>
-  <path d="M71 54.5 C67.5 49.5 57 48.5 53.5 53 C57 56 68 56.5 71 54.5 Z" fill="url(#eye-${uid})"/>
-  <circle cx="34" cy="52" r="1.1" fill="#ffffff"/><circle cx="60" cy="52" r="1.1" fill="#ffffff"/>`;
+  <!-- robe / shoulders, bleeds off the bottom edge -->
+  <path d="M50 89 C38 89 30 93 26 101 C20 110 16 118 14 123 L86 123 C84 118 80 110 74 101 C70 93 62 89 50 89 Z" fill="url(#robe-${uid})"/>
+  <path d="M50 90 C46 97 43 104 42 114 L58 114 C57 104 54 97 50 90 Z" fill="#080b13" opacity="0.7"/>
+  <path d="M50 90 L42.5 113 M50 90 L57.5 113" fill="none" stroke="${o.band}" stroke-width="1.6" stroke-linecap="round" opacity="0.9"/>
+  <!-- head / hood -->
+  <path d="M50 4 C72 4 88 19 90 42 C91 57 86 69 76 79 C69 86 60 90 50 90 C40 90 31 86 24 79 C14 69 9 57 10 42 C12 19 28 4 50 4 Z" fill="url(#hood-${uid})"/>
+  <path d="M50 4 C39 4 30 8 23 15 C17 21 12 30 10.5 41" fill="none" stroke="${o.rim}" stroke-opacity="0.55" stroke-width="1.7" stroke-linecap="round"/>
+  <!-- headband -->
+  <path d="M11 40 C31 32 69 32 89 40 L89 49 C69 41 31 41 11 49 Z" fill="url(#band-${uid})"/>
+  <path d="M87 44 C101 45 110 52 105 62 C100 54 93 50 85 49 Z" fill="${o.bandB}"/>
+  <path d="M86 48 C100 55 106 65 100 73 C97 63 91 55 83 53 Z" fill="${o.band}"/>
+  ${o.plate?`<rect x="43" y="34.2" width="14" height="10" rx="2.8" fill="#0b0e17"/><path d="M50 35.8 l1.6 3.1 3.1 1.6 -3.1 1.6 -1.6 3.1 -1.6 -3.1 -3.1 -1.6 3.1 -1.6 Z" fill="${o.rim}"/>`:""}
+  <!-- eye opening + glowing eyes -->
+  <path d="M19 49 C36 44 64 44 81 49 L81 61 C64 66 36 66 19 61 Z" fill="#070a12"/>
+  <g filter="url(#soft-${uid})" fill="${o.glow}" opacity="0.9"><ellipse cx="34" cy="56" rx="8.5" ry="4.6"/><ellipse cx="66" cy="56" rx="8.5" ry="4.6"/></g>
+  <path d="M25 57.5 C29 52 43 51 47.5 56 C43 59.5 30 60 25 57.5 Z" fill="url(#eye-${uid})"/>
+  <path d="M75 57.5 C71 52 57 51 52.5 56 C57 59.5 70 60 75 57.5 Z" fill="url(#eye-${uid})"/>
+  <circle cx="31" cy="55" r="1.4" fill="#ffffff"/><circle cx="63" cy="55" r="1.4" fill="#ffffff"/>`;
 }
 
 function tile(id,uid,forExport){
@@ -113,14 +120,17 @@ function tile(id,uid,forExport){
     <radialGradient id="gC-${uid}" cx="0.15" cy="0.08" r="0.75"><stop offset="0%" stop-color="#4fe3d0" stop-opacity="0.24"/><stop offset="100%" stop-color="#4fe3d0" stop-opacity="0"/></radialGradient>
     <radialGradient id="gV-${uid}" cx="0.5" cy="1.12" r="0.75"><stop offset="0%" stop-color="#a889ff" stop-opacity="0.28"/><stop offset="100%" stop-color="#a889ff" stop-opacity="0"/></radialGradient>
     <pattern id="gr-${uid}" width="64" height="64" patternUnits="userSpaceOnUse"><path d="M64 0 H0 V64" fill="none" stroke="#ffffff" stroke-opacity="0.04" stroke-width="1"/></pattern>
+    <clipPath id="clip-${uid}"><rect width="1024" height="1024" rx="200"/></clipPath>
   </defs>
   <rect width="1024" height="1024" rx="200" fill="#070a12"/>
   <rect width="1024" height="1024" rx="200" fill="url(#gr-${uid})"/>
   <rect width="1024" height="1024" rx="200" fill="url(#gB-${uid})"/>
   <rect width="1024" height="1024" rx="200" fill="url(#gC-${uid})"/>
   <rect width="1024" height="1024" rx="200" fill="url(#gV-${uid})"/>
+  <g clip-path="url(#clip-${uid})">
+    <svg x="150" y="140" width="724" height="890" viewBox="0 0 100 123">${ninja(o,uid)}</svg>
+  </g>
   <rect x="3" y="3" width="1018" height="1018" rx="197" fill="none" stroke="#ffffff" stroke-opacity="0.1" stroke-width="2"/>
-  <svg x="250" y="205" width="524" height="566" viewBox="0 0 100 108">${ninja(o,uid)}</svg>
 </svg>`;
 }
 
