@@ -13,12 +13,11 @@
 <style>
   :root{
     --bg:#050507;
-    --surface:rgba(255,255,255,.022); --surface2:rgba(255,255,255,.04);
-    --line:rgba(255,255,255,.08); --line-strong:rgba(255,255,255,.17);
+    --surface:rgba(255,255,255,.03); --surface2:rgba(255,255,255,.05);
+    --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.18);
     --ink:#f4f2fb; --muted:#a1a5ba; --faint:#6a6f83; --label:#bcc4e6;
     --cyan:#4fe3d0; --blue:#6f8dff; --violet:#a889ff; --btn:#4f6bff;
     --safe:#25c66a; --caution:#f5b544; --scam:#ff5468;
-    --maxw:1160px;
     --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   }
   *{box-sizing:border-box}
@@ -26,18 +25,21 @@
   body{margin:0;background:var(--bg);color:var(--ink);overflow-x:hidden;
     font:16px/1.65 "Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
     -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-  h1,h2,h3,.brand-name,.hnum,.stat .num{font-family:"Space Grotesk","Inter",sans-serif}
+  h1,h2,h3,.brand-name,.stat .num,.metric .mv,.foot-mark{font-family:"Space Grotesk","Inter",sans-serif}
   a{color:var(--cyan);text-decoration:none}
   ::selection{background:rgba(79,227,208,.26);color:#fff}
+  .inner{width:min(1280px,calc(100% - 48px));margin:0 auto}
+  .eyebrow{font-family:var(--mono);color:var(--label);font-size:12px;letter-spacing:.16em;text-transform:uppercase;display:inline-flex;align-items:center;gap:9px}
+  .eyebrow .di{color:var(--cyan)}
 
   /* ---------- background ---------- */
   .bg-layer{position:fixed;inset:0;z-index:-3;pointer-events:none}
   .bg-base{background:
-    radial-gradient(1100px 720px at 82% -12%, rgba(111,141,255,.16), transparent 58%),
-    radial-gradient(920px 700px at 6% 2%, rgba(79,227,208,.11), transparent 55%),
-    radial-gradient(1200px 900px at 50% 116%, rgba(168,137,255,.10), transparent 60%),
+    radial-gradient(1200px 760px at 82% -12%, rgba(111,141,255,.17), transparent 58%),
+    radial-gradient(960px 720px at 4% 0%, rgba(79,227,208,.11), transparent 55%),
+    radial-gradient(1300px 960px at 50% 118%, rgba(168,137,255,.10), transparent 60%),
     var(--bg)}
-  .aurora{position:fixed;inset:-30% -10% auto -10%;height:120vh;z-index:-2;pointer-events:none;filter:blur(94px);opacity:.55}
+  .aurora{position:fixed;inset:-30% -10% auto -10%;height:120vh;z-index:-2;pointer-events:none;filter:blur(96px);opacity:.5}
   .aurora i{position:absolute;display:block;border-radius:50%;mix-blend-mode:screen;will-change:transform}
   .aurora .a1{width:52vw;height:52vw;left:-6vw;top:-8vh;background:radial-gradient(circle,rgba(79,227,208,.5),transparent 66%);animation:drift1 22s ease-in-out infinite}
   .aurora .a2{width:46vw;height:46vw;right:-4vw;top:-14vh;background:radial-gradient(circle,rgba(111,141,255,.55),transparent 66%);animation:drift2 28s ease-in-out infinite}
@@ -46,69 +48,50 @@
   @keyframes drift2{0%,100%{transform:translate(0,0) scale(1.05)}50%{transform:translate(-7vw,9vh) scale(.92)}}
   @keyframes drift3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-5vw,-6vh) scale(1.15)}}
   #particles{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.5}
-  .grid-mask{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.3;
-    background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
-    background-size:68px 68px;
-    -webkit-mask-image:radial-gradient(1000px 640px at 70% 0%,#000,transparent 74%);mask-image:radial-gradient(1000px 640px at 70% 0%,#000,transparent 74%)}
-  .cursor-glow{position:fixed;top:0;left:0;width:480px;height:480px;border-radius:50%;z-index:-1;pointer-events:none;
-    transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(79,227,208,.08),transparent 62%);opacity:0;transition:opacity .4s}
-
-  .wrap{width:100%;max-width:var(--maxw);margin:0 auto;padding:0 22px}
-  .eyebrow{font-family:var(--mono);color:var(--label);font-size:12px;letter-spacing:.16em;text-transform:uppercase;
-    display:inline-flex;align-items:center;gap:9px}
-  .eyebrow .di{color:var(--cyan)}
+  .cursor-glow{position:fixed;top:0;left:0;width:480px;height:480px;border-radius:50%;z-index:-1;pointer-events:none;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(79,227,208,.08),transparent 62%);opacity:0;transition:opacity .4s}
 
   /* ---------- nav ---------- */
   .nav-shell{position:sticky;top:0;z-index:50;transition:background .3s,backdrop-filter .3s,border-color .3s;border-bottom:1px solid transparent}
   .nav-shell.scrolled{background:rgba(5,5,7,.7);backdrop-filter:blur(14px);border-bottom-color:var(--line)}
-  nav{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;max-width:var(--maxw);margin:0 auto}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:18px 0}
   .brand{display:flex;align-items:center;gap:11px;font-weight:700;font-size:19px;letter-spacing:-.01em}
   .brand .logo{font-size:23px;filter:drop-shadow(0 2px 9px rgba(79,227,208,.5))}
-  .nav-right{display:flex;align-items:center;gap:18px}
+  .nav-right{display:flex;align-items:center;gap:20px}
   .nav-link{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);transition:color .2s}
   .nav-link:hover{color:var(--ink)}
   .okx{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:7px 12px;background:var(--surface);transition:border-color .25s,color .25s}
   .okx:hover{border-color:rgba(79,227,208,.45);color:var(--ink)}
   .okx b{color:var(--ink)}
-  @media(max-width:620px){.nav-link.hide-sm{display:none}}
+  @media(max-width:640px){.nav-link.hide-sm{display:none}}
 
   /* ---------- buttons ---------- */
   .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;border:1px solid var(--line-strong);border-radius:11px;
     padding:13px 20px;font:inherit;font-weight:600;font-size:15px;cursor:pointer;color:var(--ink);background:var(--surface2);
     transition:transform .2s cubic-bezier(.2,.7,.3,1),box-shadow .25s,border-color .25s;will-change:transform}
   .btn svg{width:16px;height:16px}
-  .btn:hover{transform:translateY(-2px);border-color:var(--line-strong)}
+  .btn:hover{transform:translateY(-2px)}
   .btn-primary{border-color:rgba(140,160,255,.55);background:var(--btn);color:#fff;box-shadow:0 0 34px rgba(79,107,255,.3)}
   .btn-primary:hover{box-shadow:0 18px 60px rgba(79,107,255,.34);border-color:rgba(170,185,255,.7)}
   .btn-primary:active{transform:translateY(0) scale(.98)}
   .btn:disabled{opacity:.55;cursor:default;transform:none;box-shadow:none}
 
   /* ---------- hero ---------- */
-  .hero{display:grid;grid-template-columns:1fr;gap:44px;align-items:center;padding:70px 0 30px}
-  @media(min-width:940px){.hero{grid-template-columns:0.92fr 1.08fr;gap:52px;padding:96px 0 40px}}
-  .hero-copy h1{font-size:clamp(44px,5.6vw,78px);line-height:1.02;letter-spacing:-.038em;margin:20px 0 22px;font-weight:700}
-  .hero-copy h1 .l{display:block;overflow:hidden}
-  .hero-copy h1 .l>span{display:block;will-change:transform}
-  .grad{background:linear-gradient(96deg,var(--cyan),var(--blue) 52%,var(--violet));background-size:200% auto;
-    -webkit-background-clip:text;background-clip:text;color:transparent;animation:hue 9s ease-in-out infinite}
+  .hero{position:relative;padding:clamp(40px,5vw,72px) 0 40px;border-bottom:1px solid var(--line)}
+  .hero-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:28px;align-items:center}
+  .hero-copy{grid-column:1 / span 7}
+  .hero-stage{grid-column:8 / -1;position:relative}
+  .hero-copy h1{font-size:clamp(3rem,7vw,6.4rem);line-height:.9;letter-spacing:-.03em;text-transform:uppercase;font-weight:700;margin:24px 0 26px}
+  .hero-copy h1 .grad{background:linear-gradient(96deg,var(--cyan),var(--blue) 52%,var(--violet));background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:hue 9s ease-in-out infinite}
   @keyframes hue{0%,100%{background-position:0% center}50%{background-position:100% center}}
-  .hero-copy .sub{color:var(--muted);font-size:clamp(16px,1.7vw,18.5px);max-width:520px;margin:0 0 30px;line-height:1.6}
+  .hero-copy .sub{color:var(--muted);font-size:clamp(16px,1.5vw,18.5px);max-width:48ch;margin:0 0 30px;line-height:1.6}
   .hero-copy .sub b{color:var(--ink);font-weight:600}
-  .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:26px}
-  .hero-trust{font-family:var(--mono);font-size:12px;letter-spacing:.02em;color:var(--faint);line-height:1.9;max-width:460px}
-  .hero-trust b{color:var(--muted);font-weight:500}
+  .hero-actions{display:flex;gap:12px;flex-wrap:wrap}
 
-  /* checker (hero stage) */
-  .hero-stage{position:relative}
-  .stage-tag{position:absolute;top:-11px;left:20px;z-index:2;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
-    color:var(--cyan);background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:4px 10px}
-  .card{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;
-    box-shadow:0 40px 120px -50px rgba(0,0,0,.9);backdrop-filter:blur(16px);overflow:hidden}
-  .card::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;
-    background:radial-gradient(440px circle at var(--mx,50%) var(--my,0%),rgba(79,227,208,.12),transparent 46%)}
+  .stage-tag{position:absolute;top:-12px;left:22px;z-index:2;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--cyan);background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:4px 10px}
+  .card{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 40px 120px -50px rgba(0,0,0,.9);backdrop-filter:blur(16px);overflow:hidden}
+  .card::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(440px circle at var(--mx,50%) var(--my,0%),rgba(79,227,208,.12),transparent 46%)}
   .card:hover::before{opacity:1}
-  textarea{position:relative;width:100%;min-height:120px;resize:vertical;background:rgba(3,4,7,.6);color:var(--ink);
-    border:1px solid var(--line);border-radius:12px;padding:14px 16px;font:inherit;outline:none;transition:border-color .2s,box-shadow .2s}
+  textarea{position:relative;width:100%;min-height:118px;resize:vertical;background:rgba(3,4,7,.6);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font:inherit;outline:none;transition:border-color .2s,box-shadow .2s}
   textarea::placeholder{color:var(--faint)}
   textarea:focus{border-color:rgba(79,227,208,.55);box-shadow:0 0 0 4px rgba(79,227,208,.09)}
   .row{display:flex;gap:12px;margin-top:14px;align-items:center;flex-wrap:wrap;position:relative}
@@ -146,64 +129,52 @@
   .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:8px}
   @keyframes spin{to{transform:rotate(360deg)}}
 
-  /* ---------- stats band (borderless) ---------- */
-  .stats{display:flex;flex-wrap:wrap;justify-content:center;gap:0;margin:64px 0 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-  .stat{flex:1 1 160px;text-align:center;padding:26px 18px;position:relative}
-  .stat + .stat::before{content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);width:1px;height:38px;background:var(--line)}
-  .stat .num{font-size:34px;font-weight:700;line-height:1;color:var(--ink)}
-  .stat .num .u{color:var(--cyan)}
-  .stat .lab{font-family:var(--mono);color:var(--faint);font-size:11px;letter-spacing:.09em;text-transform:uppercase;margin-top:9px}
-
-  /* ---------- sections ---------- */
-  section{position:relative}
-  .sec-head{padding:110px 0 0}
-  .sec-head h2{font-size:clamp(30px,4.4vw,50px);letter-spacing:-.03em;margin:16px 0 14px;font-weight:700;line-height:1.05}
-  .sec-head .lede{color:var(--muted);max-width:560px;font-size:16.5px;margin:0}
+  /* ---------- proof row (metrics under hero) ---------- */
+  .proof{display:flex;flex-wrap:wrap;gap:14px 0;padding:34px 0 6px}
+  .metric{flex:1 1 180px;min-width:150px;padding-right:22px}
+  .metric .mv{font-size:clamp(30px,3vw,42px);font-weight:700;line-height:1;color:var(--ink)}
+  .metric .mv .u{color:var(--cyan)}
+  .metric .ml{font-family:var(--mono);color:var(--faint);font-size:11px;letter-spacing:.09em;text-transform:uppercase;margin-top:10px}
 
   /* ---------- trust marquee ---------- */
-  .trust{padding:78px 0}
-  .trust-lab{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);text-align:center;margin:0 0 24px}
+  .trust{padding:70px 0 30px}
+  .trust-lab{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);text-align:center;margin:0 0 26px}
   .marquee{overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);mask:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)}
-  .mtrack{display:flex;width:max-content;animation:scrollx 34s linear infinite}
+  .mtrack{display:flex;width:max-content;animation:scrollx 36s linear infinite}
   .marquee:hover .mtrack{animation-play-state:paused}
   @keyframes scrollx{to{transform:translateX(-50%)}}
-  .m-item{display:inline-flex;align-items:center;gap:11px;padding:0 34px;white-space:nowrap;color:var(--ink);font-size:17px;font-weight:500}
-  .m-item .mk{color:var(--cyan);font-size:13px}
-  .m-item span{color:var(--muted);font-weight:400;font-size:14px}
+  .m-item{display:inline-flex;align-items:baseline;gap:11px;padding:0 40px;white-space:nowrap;color:var(--ink);font-size:clamp(18px,2vw,26px);font-weight:600;letter-spacing:-.01em}
+  .m-item .mk{color:var(--cyan);font-size:14px}
+  .m-item span{color:var(--muted);font-weight:400;font-size:15px}
 
-  /* ---------- how it works (horizontal) ---------- */
-  #how{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:60px 0}
-  .how-head{max-width:var(--maxw);margin:0 auto;padding:0 22px;width:100%}
-  .how-head h2{font-size:clamp(30px,4.4vw,50px);letter-spacing:-.03em;margin:16px 0 14px;font-weight:700}
-  .how-head .lede{color:var(--muted);max-width:560px;font-size:16.5px;margin:0 0 26px}
-  .hprog{height:2px;background:var(--line);border-radius:2px;max-width:320px;overflow:hidden}
-  .hprog span{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--cyan),var(--blue));transform:scaleX(0);transform-origin:left}
-  .htrack-wrap{overflow:hidden;width:100%;margin-top:44px}
-  .htrack{display:flex;gap:26px;will-change:transform;padding-inline:max(22px,calc((100vw - var(--maxw))/2 + 22px))}
-  .hcard{flex:0 0 auto;width:min(76vw,440px);min-height:300px;border:1px solid var(--line);border-radius:16px;padding:34px;
-    background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01)),var(--surface);position:relative;overflow:hidden;
-    display:flex;flex-direction:column}
-  .hcard::after{content:attr(data-bg);position:absolute;right:-8px;bottom:-34px;font-family:"Space Grotesk";font-weight:700;font-size:180px;line-height:1;color:rgba(255,255,255,.028);pointer-events:none}
-  .hnum{font-family:var(--mono);font-size:13px;letter-spacing:.14em;color:var(--cyan);margin-bottom:auto}
-  .hcard h3{font-size:26px;letter-spacing:-.02em;margin:24px 0 12px;font-weight:600}
-  .hcard p{margin:0;color:var(--muted);font-size:15px;line-height:1.6}
-  .hcard.end{background:linear-gradient(180deg,rgba(79,107,255,.16),rgba(79,227,208,.06)),var(--surface);border-color:rgba(111,141,255,.35)}
-  .hcard.end h3{color:#fff}
-  @media(max-width:760px){
-    #how{min-height:auto;padding:60px 0}
-    .htrack{flex-direction:column;padding-inline:22px}
-    .hcard{width:auto;min-height:auto}
-    .hprog{display:none}
-  }
+  /* ---------- section heads (editorial 12-col) ---------- */
+  .kicker{margin:0 0 30px}
+  .split-intro{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:28px;align-items:end}
+  .split-intro h2{grid-column:1 / span 8;margin:0;font-size:clamp(2.5rem,5.6vw,5rem);line-height:.94;letter-spacing:-.03em;text-transform:uppercase;font-weight:700}
+  .split-intro p{grid-column:9 / -1;margin:0;color:var(--muted);font-size:16.5px;line-height:1.6;padding-bottom:8px}
+  .split-intro .grad{background:linear-gradient(96deg,var(--cyan),var(--blue) 55%,var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent}
 
-  /* ---------- agents split ---------- */
-  #agents{padding:110px 0 40px}
-  .agents-split{display:grid;grid-template-columns:1fr;gap:40px;align-items:start}
-  @media(min-width:900px){.agents-split{grid-template-columns:0.85fr 1.15fr;gap:56px;align-items:center}}
-  #agents h2{font-size:clamp(30px,4.4vw,50px);letter-spacing:-.03em;margin:16px 0 14px;font-weight:700}
-  #agents .lede{color:var(--muted);font-size:16.5px;margin:0 0 26px;max-width:440px}
-  .spec{list-style:none;padding:0;margin:0;border-top:1px solid var(--line)}
-  .spec li{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 2px;border-bottom:1px solid var(--line)}
+  /* ---------- how it works (light section) ---------- */
+  .how{background:#f3f3f5;color:#0b0b0e;padding:clamp(88px,11vw,150px) 0;
+    --ink:#0b0b0e;--muted:#565962;--faint:#8b8e97;--line:rgba(0,0,0,.12);--surface:#ffffff;--label:#6244d8}
+  .process{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin-top:64px}
+  .pcard{position:relative;min-height:290px;padding:28px;border:1px solid var(--line);border-radius:16px;background:var(--surface);overflow:hidden;display:flex;flex-direction:column;
+    box-shadow:0 20px 50px -34px rgba(20,16,40,.35)}
+  .pcard .pn{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--label)}
+  .pcard h3{font-size:1.5rem;letter-spacing:-.01em;text-transform:uppercase;margin:auto 0 12px;font-weight:600}
+  .pcard p{margin:0;color:var(--muted);font-size:14.5px;line-height:1.6}
+  .pcard.end{background:linear-gradient(180deg,#4f6bff,#6f8dff);color:#fff;border-color:transparent}
+  .pcard.end .pn,.pcard.end h3{color:#fff}
+  .pcard.end p{color:rgba(255,255,255,.86)}
+  @media(max-width:900px){.process{grid-template-columns:1fr 1fr}}
+  @media(max-width:560px){.process{grid-template-columns:1fr}}
+
+  /* ---------- agents ---------- */
+  .agents{padding:clamp(90px,11vw,150px) 0 30px}
+  .agents-split{display:grid;grid-template-columns:1fr;gap:44px;align-items:center;margin-top:44px}
+  @media(min-width:920px){.agents-split{grid-template-columns:0.9fr 1.1fr;gap:60px}}
+  .spec{list-style:none;padding:0;margin:26px 0 0;border-top:1px solid var(--line)}
+  .spec li{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:15px 2px;border-bottom:1px solid var(--line)}
   .spec li span{font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint)}
   .spec li b{font-weight:600;color:var(--ink);font-size:15px}
   .codewrap{position:relative}
@@ -214,16 +185,22 @@
   .copy:hover{color:var(--ink);border-color:rgba(79,227,208,.5)}
 
   /* ---------- footer ---------- */
-  footer{border-top:1px solid var(--line);margin-top:70px;padding:56px 0 40px;position:relative;overflow:hidden}
-  .foot-mark{font-family:"Space Grotesk";font-weight:700;font-size:clamp(70px,17vw,220px);line-height:.9;letter-spacing:-.04em;text-align:center;
-    background:linear-gradient(180deg,rgba(255,255,255,.11),rgba(255,255,255,.01));-webkit-background-clip:text;background-clip:text;color:transparent;user-select:none;margin:0 0 6px}
+  footer{border-top:1px solid var(--line);margin-top:40px;padding:56px 0 40px;overflow:hidden}
+  .foot-mark{font-weight:700;font-size:clamp(74px,19vw,260px);line-height:.86;letter-spacing:-.04em;text-align:center;
+    background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.012));-webkit-background-clip:text;background-clip:text;color:transparent;user-select:none;margin:0 0 10px}
   .foot-meta{text-align:center;color:var(--muted);font-size:13.5px;line-height:1.8}
   .foot-meta a{color:var(--cyan)}
 
-  /* reveal (JS-gated) */
+  /* reveal + responsive */
   .js .reveal{opacity:0;transform:translateY(28px)}
+  @media(max-width:900px){
+    .hero-grid{grid-template-columns:1fr;gap:36px}
+    .hero-copy,.hero-stage{grid-column:auto}
+    .split-intro{grid-template-columns:1fr;gap:18px;align-items:start}
+    .split-intro h2,.split-intro p{grid-column:auto}
+  }
   @media (prefers-reduced-motion:reduce){
-    .aurora i,.grad{animation:none}
+    .aurora i,.hero-copy h1 .grad{animation:none}
     .js .reveal{opacity:1;transform:none}
     #particles,.cursor-glow,.mtrack{animation:none}
   }
@@ -233,11 +210,10 @@
 <div class="bg-layer bg-base"></div>
 <div class="aurora"><i class="a1"></i><i class="a2"></i><i class="a3"></i></div>
 <canvas id="particles"></canvas>
-<div class="grid-mask"></div>
 <div class="cursor-glow" id="cglow"></div>
 
 <div class="nav-shell" id="navshell">
-  <nav>
+  <nav class="inner">
     <div class="brand"><span class="logo">🥷</span> <span class="brand-name">Scaminja</span></div>
     <div class="nav-right">
       <a class="nav-link hide-sm" href="#how">How it works</a>
@@ -247,23 +223,18 @@
   </nav>
 </div>
 
-<div class="wrap">
-  <header class="hero">
+<section class="hero">
+  <div class="inner hero-grid">
     <div class="hero-copy">
-      <span class="eyebrow"><span class="di">◆</span> AI scam &amp; fraud detection</span>
-      <h1>
-        <span class="l"><span>Is it legit?</span></span>
-        <span class="l"><span class="grad">Know in seconds.</span></span>
-      </h1>
-      <p class="sub">Paste any message, link, email, or crypto wallet address — get an instant <b>Safe · Caution · Scam</b> verdict, backed by evidence from real security databases.</p>
-      <div class="hero-actions">
+      <span class="eyebrow motion"><span class="di">◆</span> AI scam &amp; fraud detection</span>
+      <h1 class="motion">Is it legit?<br><span class="grad">Know in seconds.</span></h1>
+      <p class="sub motion">Paste any message, link, email, or crypto wallet address — get an instant <b>Safe · Caution · Scam</b> verdict, backed by evidence from real security databases.</p>
+      <div class="hero-actions motion">
         <a class="btn" href="#how">How it works</a>
         <a class="btn" href="#agents">For developers <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       </div>
-      <p class="hero-trust">Checked live against <b>Google Safe Browsing</b>, <b>VirusTotal</b>, <b>GoPlus</b>, <b>OFAC</b> &amp; domain records — never a black-box guess.</p>
     </div>
-
-    <div class="hero-stage">
+    <div class="hero-stage motion">
       <span class="stage-tag">Live · try it free</span>
       <div class="card" id="checker">
         <textarea id="in" placeholder="Paste a suspicious text, link, email, or wallet address…"></textarea>
@@ -281,53 +252,60 @@
         <div id="out"></div>
       </div>
     </div>
-  </header>
-
-  <div class="stats">
-    <div class="stat"><div class="num" data-count="6">6</div><div class="lab">live threat databases</div></div>
-    <div class="stat"><div class="num" data-count="70" data-suffix="+">70+</div><div class="lab">AV vendors · VirusTotal</div></div>
-    <div class="stat"><div class="num" data-count="3">3</div><div class="lab">clear verdict levels</div></div>
-    <div class="stat"><div class="num" data-text="0.02">0.02</div><div class="lab">USDT per agent call</div></div>
   </div>
 
-  <section class="trust">
+  <div class="inner">
+    <div class="proof">
+      <div class="metric motion"><span class="mv" data-count="6">6</span><span class="ml">live threat databases</span></div>
+      <div class="metric motion"><span class="mv" data-count="70" data-suffix="+">70+</span><span class="ml">AV vendors · VirusTotal</span></div>
+      <div class="metric motion"><span class="mv" data-count="3">3</span><span class="ml">clear verdict levels</span></div>
+      <div class="metric motion"><span class="mv" data-text="0.02">0.02</span><span class="ml">USDT per agent call</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="trust">
+  <div class="inner">
     <p class="trust-lab reveal">Every verdict is verified against real sources</p>
-    <div class="marquee">
-      <div class="mtrack" id="mtrack">
-        <div class="m-item"><span class="mk">✦</span> Google Safe Browsing <span>blocklist</span></div>
-        <div class="m-item"><span class="mk">✦</span> VirusTotal <span>70+ vendors</span></div>
-        <div class="m-item"><span class="mk">✦</span> GoPlus <span>on-chain security</span></div>
-        <div class="m-item"><span class="mk">✦</span> OFAC <span>sanctions list</span></div>
-        <div class="m-item"><span class="mk">✦</span> RDAP <span>domain age</span></div>
-        <div class="m-item"><span class="mk">✦</span> Brand &amp; typosquat <span>detection</span></div>
-        <div class="m-item"><span class="mk">✦</span> Email <span>SPF · DKIM · DMARC</span></div>
-      </div>
+  </div>
+  <div class="marquee">
+    <div class="mtrack" id="mtrack">
+      <div class="m-item"><span class="mk">✦</span> Google Safe Browsing <span>blocklist</span></div>
+      <div class="m-item"><span class="mk">✦</span> VirusTotal <span>70+ vendors</span></div>
+      <div class="m-item"><span class="mk">✦</span> GoPlus <span>on-chain security</span></div>
+      <div class="m-item"><span class="mk">✦</span> OFAC <span>sanctions list</span></div>
+      <div class="m-item"><span class="mk">✦</span> RDAP <span>domain age</span></div>
+      <div class="m-item"><span class="mk">✦</span> Brand &amp; typosquat <span>detection</span></div>
+      <div class="m-item"><span class="mk">✦</span> Email <span>SPF · DKIM · DMARC</span></div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section id="how">
-    <div class="how-head">
-      <span class="eyebrow reveal"><span class="di">◆</span> How it works</span>
-      <h2 class="reveal">Evidence, not opinion.</h2>
-      <p class="lede reveal">Most "is this a scam?" tools just guess. Scaminja extracts every link, address, and email, verifies each against authoritative databases, then shows you the proof — tagged verified fact vs assessment.</p>
-      <div class="hprog reveal"><span id="hprogbar"></span></div>
+<section class="how" id="how">
+  <div class="inner">
+    <div class="kicker reveal"><span class="eyebrow"><span class="di">◆</span> How it works</span></div>
+    <div class="split-intro">
+      <h2 class="reveal">Evidence,<br><span class="grad">not opinion.</span></h2>
+      <p class="reveal">Most "is this a scam?" tools just guess. Scaminja extracts every link, address, and email, verifies each against authoritative databases, then shows you the proof — tagged verified fact vs assessment.</p>
     </div>
-    <div class="htrack-wrap">
-      <div class="htrack" id="htrack">
-        <article class="hcard" data-bg="01"><span class="hnum">STEP 01</span><h3>Extract</h3><p>Scaminja pulls every URL, domain, wallet address, token, and email sender out of whatever you paste — plain text or a screenshot.</p></article>
-        <article class="hcard" data-bg="02"><span class="hnum">STEP 02</span><h3>Verify</h3><p>Each entity is checked in parallel against Safe Browsing, VirusTotal, GoPlus, OFAC, domain records, and brand look-alike detection — live, in real time.</p></article>
-        <article class="hcard" data-bg="03"><span class="hnum">STEP 03</span><h3>Verdict</h3><p>You get a clear Safe / Caution / Scam call with the red flags, the cited evidence, and exactly what to do next — in seconds.</p></article>
-        <article class="hcard end" data-bg="→"><span class="hnum">READY</span><h3>Try it yourself</h3><p>Paste anything into the checker above. It's free, needs no account, and nothing you submit is stored.</p></article>
-      </div>
+    <div class="process">
+      <article class="pcard"><span class="pn">Step 01</span><h3>Extract</h3><p>Pulls every URL, domain, wallet address, token, and email sender out of whatever you paste — text or a screenshot.</p></article>
+      <article class="pcard"><span class="pn">Step 02</span><h3>Verify</h3><p>Each entity is checked in parallel against Safe Browsing, VirusTotal, GoPlus, OFAC, domain records, and brand look-alike detection — live.</p></article>
+      <article class="pcard"><span class="pn">Step 03</span><h3>Verdict</h3><p>A clear Safe / Caution / Scam call with the red flags, the cited evidence, and exactly what to do next — in seconds.</p></article>
+      <article class="pcard end"><span class="pn">Ready</span><h3>Try it yourself</h3><p>Paste anything into the checker above. Free, no account, and nothing you submit is stored.</p></article>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section id="agents">
+<section class="agents" id="agents">
+  <div class="inner">
+    <div class="kicker reveal"><span class="eyebrow"><span class="di">◆</span> For the agent economy</span></div>
+    <div class="split-intro">
+      <h2 class="reveal">Built for<br><span class="grad">agents, too.</span></h2>
+      <p class="reveal">Scaminja is a paid, callable service any AI agent can rent on demand — pay per call, get structured JSON back, settled on-chain via the x402 standard.</p>
+    </div>
     <div class="agents-split">
       <div class="reveal">
-        <span class="eyebrow"><span class="di">◆</span> For the agent economy</span>
-        <h2>Built for agents, too.</h2>
-        <p class="lede">Scaminja is a paid, callable service any AI agent can rent on demand — pay per call, get structured JSON back, settled on-chain via the x402 standard.</p>
         <ul class="spec">
           <li><span>Protocol</span><b>x402 · A2MCP</b></li>
           <li><span>Price</span><b>0.02 USDT / call</b></li>
@@ -345,14 +323,16 @@
 <span class="tok-m">#   then receive the full verdict + evidence JSON</span></code></pre>
       </div>
     </div>
-  </section>
-</div>
+  </div>
+</section>
 
 <footer>
-  <div class="foot-mark">SCAMINJA</div>
-  <div class="foot-meta">
-    Risk guidance, not a guarantee — always verify independently. Scaminja does not store the content you submit.<br/>
-    An Agentic Service Provider on <a href="https://www.okx.ai" target="_blank" rel="noopener">OKX.AI</a>.
+  <div class="inner">
+    <div class="foot-mark">SCAMINJA</div>
+    <div class="foot-meta">
+      Risk guidance, not a guarantee — always verify independently. Scaminja does not store the content you submit.<br/>
+      An Agentic Service Provider on <a href="https://www.okx.ai" target="_blank" rel="noopener">OKX.AI</a>.
+    </div>
   </div>
 </footer>
 
@@ -427,7 +407,7 @@ $("#copy").onclick = () => {
 const navshell = $("#navshell");
 addEventListener("scroll",()=>navshell.classList.toggle("scrolled",scrollY>12),{passive:true});
 
-/* ---------------- marquee: duplicate items for a seamless -50% loop ---------------- */
+/* ---------------- marquee seamless loop ---------------- */
 const mtrack = $("#mtrack");
 if(mtrack) mtrack.innerHTML += mtrack.innerHTML;
 
@@ -435,19 +415,10 @@ if(mtrack) mtrack.innerHTML += mtrack.innerHTML;
 if(!reduce && matchMedia("(pointer:fine)").matches){
   const cg = $("#cglow");
   addEventListener("mousemove",e=>{ cg.style.opacity=1; cg.style.left=e.clientX+"px"; cg.style.top=e.clientY+"px"; },{passive:true});
-
-  const mag = go, strength = .3;
-  mag.addEventListener("mousemove",e=>{
-    const r=mag.getBoundingClientRect();
-    mag.style.transform=`translate(${(e.clientX-r.left-r.width/2)*strength}px,${(e.clientY-r.top-r.height/2)*strength}px)`;
-  });
-  mag.addEventListener("mouseleave",()=>{ mag.style.transform=""; });
-
-  $("#checker").addEventListener("mousemove",e=>{
-    const el=$("#checker"), r=el.getBoundingClientRect();
-    el.style.setProperty("--mx",((e.clientX-r.left)/r.width*100)+"%");
-    el.style.setProperty("--my",((e.clientY-r.top)/r.height*100)+"%");
-  });
+  const strength=.3;
+  go.addEventListener("mousemove",e=>{ const r=go.getBoundingClientRect(); go.style.transform=`translate(${(e.clientX-r.left-r.width/2)*strength}px,${(e.clientY-r.top-r.height/2)*strength}px)`; });
+  go.addEventListener("mouseleave",()=>{ go.style.transform=""; });
+  $("#checker").addEventListener("mousemove",e=>{ const el=$("#checker"),r=el.getBoundingClientRect(); el.style.setProperty("--mx",((e.clientX-r.left)/r.width*100)+"%"); el.style.setProperty("--my",((e.clientY-r.top)/r.height*100)+"%"); });
 }
 
 /* ---------------- particle constellation ---------------- */
@@ -462,8 +433,7 @@ if(!reduce && matchMedia("(pointer:fine)").matches){
     pts=Array.from({length:n},()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.26*dpr,vy:(Math.random()-.5)*.26*dpr}));
   }
   function draw(){
-    ctx.clearRect(0,0,w,h);
-    const R=132*dpr;
+    ctx.clearRect(0,0,w,h); const R=132*dpr;
     for(const p of pts){
       p.x+=p.vx; p.y+=p.vy;
       if(p.x<0||p.x>w)p.vx*=-1; if(p.y<0||p.y>h)p.vy*=-1;
@@ -484,38 +454,24 @@ if(!reduce && matchMedia("(pointer:fine)").matches){
   size(); draw();
 })();
 
-/* ---------------- GSAP: hero, reveals, horizontal scroll, counters ---------------- */
+/* ---------------- GSAP: hero + reveals + process + counters ---------------- */
 if(window.gsap){
   gsap.registerPlugin(ScrollTrigger);
-
   if(!reduce){
-    const tl = gsap.timeline({defaults:{ease:"power3.out"}});
-    tl.from(".hero-copy .eyebrow",{y:16,opacity:0,duration:.6})
-      .from(".hero-copy h1 .l>span",{yPercent:118,duration:.95,stagger:.12,ease:"power4.out"},"-=0.25")
-      .from(".hero-copy .sub",{y:16,opacity:0,duration:.6},"-=0.55")
-      .from(".hero-actions",{y:14,opacity:0,duration:.5},"-=0.4")
-      .from(".hero-trust",{y:12,opacity:0,duration:.5},"-=0.35")
-      .from(".hero-stage",{y:34,opacity:0,duration:.9,ease:"power3.out"},"-=0.7")
-      .from(".stats .stat",{y:18,opacity:0,duration:.5,stagger:.07},"-=0.3");
+    gsap.timeline({defaults:{ease:"power3.out"}})
+      .from(".hero-copy .motion",{y:28,opacity:0,duration:.7,stagger:.09})
+      .from(".hero-stage",{y:34,opacity:0,duration:.9},"-=0.5")
+      .from(".proof .motion",{y:18,opacity:0,duration:.5,stagger:.07},"-=0.4");
 
     document.querySelectorAll(".reveal").forEach(el=>{
       gsap.to(el,{opacity:1,y:0,duration:.7,ease:"power3.out",scrollTrigger:{trigger:el,start:"top 86%"}});
     });
 
-    // horizontal pinned "how it works" (desktop only)
-    const htrack = $("#htrack"), hwrap = htrack && htrack.parentElement, bar = $("#hprogbar");
-    if(htrack && innerWidth > 760){
-      const dist = () => Math.max(0, htrack.scrollWidth - hwrap.clientWidth);
-      gsap.to(htrack,{ x:()=>-dist(), ease:"none",
-        scrollTrigger:{ trigger:"#how", start:"top top", end:()=>"+="+dist(),
-          pin:true, scrub:1, invalidateOnRefresh:true, anticipatePin:1,
-          onUpdate:self=>{ if(bar) bar.style.transform="scaleX("+self.progress.toFixed(3)+")"; } }});
-    }
+    gsap.from(".pcard",{y:44,opacity:0,duration:.7,stagger:.1,ease:"power3.out",
+      scrollTrigger:{trigger:".process",start:"top 82%"}});
 
-    // count-up
     document.querySelectorAll("[data-count],[data-text]").forEach(el=>{
-      const txt=el.dataset.text, suf=el.dataset.suffix||"", end=parseFloat(el.dataset.count);
-      const obj={v:0};
+      const txt=el.dataset.text, suf=el.dataset.suffix||"", end=parseFloat(el.dataset.count), obj={v:0};
       ScrollTrigger.create({trigger:el,start:"top 92%",once:true,onEnter:()=>{
         if(txt){ gsap.fromTo(obj,{v:0},{v:parseFloat(txt),duration:1.1,ease:"power2.out",onUpdate:()=>el.textContent=obj.v.toFixed(2)}); }
         else{ gsap.fromTo(obj,{v:0},{v:end,duration:1.1,ease:"power2.out",onUpdate:()=>el.innerHTML=Math.round(obj.v)+(suf?`<span class="u">${suf}</span>`:"")}); }
@@ -525,9 +481,7 @@ if(window.gsap){
     document.querySelectorAll(".reveal").forEach(el=>{el.style.opacity=1;el.style.transform="none";});
   }
 }
-if(!window.gsap){
-  document.querySelectorAll(".reveal").forEach(el=>{el.style.opacity=1;el.style.transform="none";});
-}
+if(!window.gsap){ document.querySelectorAll(".reveal").forEach(el=>{el.style.opacity=1;el.style.transform="none";}); }
 </script>
 </body>
 </html>
