@@ -85,9 +85,18 @@
   .hero-actions{display:flex;gap:12px;flex-wrap:wrap}
   .hero-bottom{margin-top:clamp(56px,10vh,130px);border-top:1px solid var(--line);padding-top:30px}
 
-  /* ---------- check section ---------- */
-  .check{padding:clamp(90px,11vw,150px) 0}
-  .check-card{max-width:840px;margin:56px auto 0;position:relative}
+  /* ---------- try it (2-col) ---------- */
+  .try{padding:clamp(96px,12vw,165px) 0}
+  .try-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:38px;align-items:center}
+  .try-copy{grid-column:1 / span 5}
+  .try-card{grid-column:6 / -1;position:relative}
+  .try-copy h2{font-size:clamp(2.1rem,3.4vw,3.4rem);line-height:1;letter-spacing:-.03em;text-transform:uppercase;font-weight:700;margin:20px 0 18px}
+  .try-copy .sub{color:var(--muted);font-size:16px;line-height:1.6;margin:0 0 24px;max-width:42ch}
+  .checklist{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:13px}
+  .checklist li{display:flex;gap:11px;align-items:flex-start;font-size:14.5px;color:var(--muted);line-height:1.5}
+  .checklist li b{color:var(--ink);font-weight:600}
+  .checklist .ck{color:var(--cyan);margin-top:1px;flex:0 0 auto}
+  @media(max-width:900px){.try-grid{grid-template-columns:1fr;gap:28px}.try-copy,.try-card{grid-column:auto}}
   .stage-tag{position:absolute;top:-12px;left:22px;z-index:2;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--cyan);background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:4px 10px}
   .card{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 40px 120px -50px rgba(0,0,0,.9);backdrop-filter:blur(16px);overflow:hidden}
   .card::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(440px circle at var(--mx,50%) var(--my,0%),rgba(79,227,208,.12),transparent 46%)}
@@ -156,10 +165,10 @@
   .split-intro .grad{background:linear-gradient(96deg,var(--cyan),var(--blue) 55%,var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent}
 
   /* ---------- how it works (light section) ---------- */
-  .how{background:#f3f3f5;color:#0b0b0e;padding:clamp(88px,11vw,150px) 0;
-    --ink:#0b0b0e;--muted:#565962;--faint:#8b8e97;--line:rgba(0,0,0,.12);--surface:#ffffff;--label:#6244d8}
-  .process{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin-top:64px}
-  .pcard{position:relative;min-height:290px;padding:28px;border:1px solid var(--line);border-radius:16px;background:var(--surface);overflow:hidden;display:flex;flex-direction:column;
+  .light{--ink:#0b0b0e;--muted:#565962;--faint:#8b8e97;--line:rgba(0,0,0,.12);--line-strong:rgba(0,0,0,.2);--surface:#ffffff;--surface2:#ececf0;--label:#6244d8;background:#f3f3f5;color:#0b0b0e}
+  .how{padding:clamp(120px,16vw,220px) 0}
+  .process{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin-top:72px}
+  .pcard{position:relative;min-height:340px;padding:30px;border:1px solid var(--line);border-radius:16px;background:var(--surface);overflow:hidden;display:flex;flex-direction:column;
     box-shadow:0 20px 50px -34px rgba(20,16,40,.35)}
   .pcard .pn{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--label)}
   .pcard h3{font-size:1.5rem;letter-spacing:-.01em;text-transform:uppercase;margin:auto 0 12px;font-weight:600}
@@ -218,6 +227,7 @@
     <div class="brand"><span class="logo">🥷</span> <span class="brand-name">Scaminja</span></div>
     <div class="nav-right">
       <a class="nav-link hide-sm" href="#how">How it works</a>
+      <a class="nav-link hide-sm" href="#check">Try it</a>
       <a class="nav-link hide-sm" href="#agents">For developers</a>
       <a class="okx" href="https://www.okx.ai" target="_blank" rel="noopener">ASP on <b>OKX.AI</b></a>
     </div>
@@ -244,14 +254,35 @@
   </div>
 </section>
 
-<section class="check" id="check">
+<section class="how light" id="how">
   <div class="inner">
-    <div class="kicker reveal"><span class="eyebrow"><span class="di">◆</span> Try it free</span></div>
+    <div class="kicker reveal"><span class="eyebrow"><span class="di">◆</span> How it works</span></div>
     <div class="split-intro">
-      <h2 class="reveal">Paste it.<br><span class="grad">Know instantly.</span></h2>
-      <p class="reveal">Drop in any suspicious message, link, email, or wallet address. Scaminja checks it against live security databases and returns an evidence-backed verdict in seconds — free, no account, and nothing you submit is stored.</p>
+      <h2 class="reveal">Evidence,<br><span class="grad">not opinion.</span></h2>
+      <p class="reveal">Most "is this a scam?" tools just guess. Scaminja extracts every link, address, and email, verifies each against authoritative databases, then shows you the proof — tagged verified fact vs assessment.</p>
     </div>
-    <div class="check-card reveal">
+    <div class="process">
+      <article class="pcard"><span class="pn">Step 01</span><h3>Extract</h3><p>Pulls every URL, domain, wallet address, token, and email sender out of whatever you paste — text or a screenshot.</p></article>
+      <article class="pcard"><span class="pn">Step 02</span><h3>Verify</h3><p>Each entity is checked in parallel against Safe Browsing, VirusTotal, GoPlus, OFAC, domain records, and brand look-alike detection — live.</p></article>
+      <article class="pcard"><span class="pn">Step 03</span><h3>Verdict</h3><p>A clear Safe / Caution / Scam call with the red flags, the cited evidence, and exactly what to do next — in seconds.</p></article>
+      <article class="pcard end"><span class="pn">Ready</span><h3>Try it yourself</h3><p>Paste anything into the checker below — free, no account, and nothing you submit is stored.</p></article>
+    </div>
+  </div>
+</section>
+
+<section class="try" id="check">
+  <div class="inner try-grid">
+    <div class="try-copy">
+      <div class="kicker reveal"><span class="eyebrow"><span class="di">◆</span> Try it free</span></div>
+      <h2 class="reveal">Paste it.<br><span class="grad">Know instantly.</span></h2>
+      <p class="sub reveal">Drop in any suspicious message, link, email, or wallet address — get an evidence-backed verdict in seconds. Free, no account, nothing stored.</p>
+      <ul class="checklist reveal">
+        <li><span class="ck">✦</span><span><b>Links &amp; domains</b> — Google Safe Browsing, VirusTotal, domain age &amp; typosquats</span></li>
+        <li><span class="ck">✦</span><span><b>Crypto</b> — GoPlus token &amp; address risk, OFAC sanctions</span></li>
+        <li><span class="ck">✦</span><span><b>Email</b> — SPF · DKIM · DMARC authentication</span></li>
+      </ul>
+    </div>
+    <div class="try-card reveal">
       <span class="stage-tag">Live · free</span>
       <div class="card" id="checker">
         <textarea id="in" placeholder="Paste a suspicious text, link, email, or wallet address…"></textarea>
@@ -272,40 +303,7 @@
   </div>
 </section>
 
-<section class="trust">
-  <div class="inner">
-    <p class="trust-lab reveal">Every verdict is verified against real sources</p>
-  </div>
-  <div class="marquee">
-    <div class="mtrack" id="mtrack">
-      <div class="m-item"><span class="mk">✦</span> Google Safe Browsing <span>blocklist</span></div>
-      <div class="m-item"><span class="mk">✦</span> VirusTotal <span>70+ vendors</span></div>
-      <div class="m-item"><span class="mk">✦</span> GoPlus <span>on-chain security</span></div>
-      <div class="m-item"><span class="mk">✦</span> OFAC <span>sanctions list</span></div>
-      <div class="m-item"><span class="mk">✦</span> RDAP <span>domain age</span></div>
-      <div class="m-item"><span class="mk">✦</span> Brand &amp; typosquat <span>detection</span></div>
-      <div class="m-item"><span class="mk">✦</span> Email <span>SPF · DKIM · DMARC</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="how" id="how">
-  <div class="inner">
-    <div class="kicker reveal"><span class="eyebrow"><span class="di">◆</span> How it works</span></div>
-    <div class="split-intro">
-      <h2 class="reveal">Evidence,<br><span class="grad">not opinion.</span></h2>
-      <p class="reveal">Most "is this a scam?" tools just guess. Scaminja extracts every link, address, and email, verifies each against authoritative databases, then shows you the proof — tagged verified fact vs assessment.</p>
-    </div>
-    <div class="process">
-      <article class="pcard"><span class="pn">Step 01</span><h3>Extract</h3><p>Pulls every URL, domain, wallet address, token, and email sender out of whatever you paste — text or a screenshot.</p></article>
-      <article class="pcard"><span class="pn">Step 02</span><h3>Verify</h3><p>Each entity is checked in parallel against Safe Browsing, VirusTotal, GoPlus, OFAC, domain records, and brand look-alike detection — live.</p></article>
-      <article class="pcard"><span class="pn">Step 03</span><h3>Verdict</h3><p>A clear Safe / Caution / Scam call with the red flags, the cited evidence, and exactly what to do next — in seconds.</p></article>
-      <article class="pcard end"><span class="pn">Ready</span><h3>Try it yourself</h3><p>Paste anything into the checker above. Free, no account, and nothing you submit is stored.</p></article>
-    </div>
-  </div>
-</section>
-
-<section class="agents" id="agents">
+<section class="agents light" id="agents">
   <div class="inner">
     <div class="kicker reveal"><span class="eyebrow"><span class="di">◆</span> For the agent economy</span></div>
     <div class="split-intro">
