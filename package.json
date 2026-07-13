@@ -14,6 +14,7 @@
     "build:all": "npm run build:web && npm run build",
     "start": "node dist/index.js",
     "smoke": "tsx test/smoke.ts",
+    "gen:demo-cache": "tsx scripts/gen-demo-cache.ts src/demo/demo-cache.json",
     "test": "vitest run"
   },
   "dependencies": {

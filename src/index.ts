@@ -1,13 +1,27 @@
 import "dotenv/config";
 import path from "node:path";
+import fs from "node:fs";
 import express from "express";
 import { analyze } from "./engine/analyze.js";
+import { asRepo } from "./engine/dispatch.js";
 import { validateInput, ValidationError } from "./security/validate.js";
 import { rateLimiter, dailyBudget } from "./security/rateLimit.js";
 import { createPaymentLayer } from "./payment/x402.js";
 import { isBreakerOpen, tripBreaker, closeBreaker, isServiceUnavailableError } from "./breaker.js";
 import { analyzeRepo } from "./repo/analyze.js";
 import { RepoError } from "./repo/fetch.js";
+
+// The 6 website example tiles are fixed inputs, so their real verdicts are
+// pre-computed once (npm run gen:demo-cache) and replayed here — those clicks
+// cost nothing and return instantly. Anything a visitor types still runs live.
+const DEMO_CACHE: Map<string, unknown> = (() => {
+  try {
+    const raw = fs.readFileSync(path.resolve("src/demo/demo-cache.json"), "utf8");
+    return new Map(Object.entries(JSON.parse(raw)));
+  } catch {
+    return new Map();
+  }
+})();
 
 const PORT = Number(process.env.PORT ?? 8080);
 const PAYMENTS_ENABLED = process.env.PAYMENTS_ENABLED === "true";
@@ -110,22 +124,19 @@ async function main() {
 
   app.get("/health", (_req, res) => res.json({ ok: true }));
 
-  // A bare GitHub repo URL, or a package.json, routes to the supply-chain engine;
-  // everything else (message/link/email/wallet/screenshot/PDF) to the scam engine.
-  const asRepo = (src: Record<string, unknown>): { repoUrl?: string; packageJson?: string } | null => {
-    const repoUrl = typeof src?.repoUrl === "string" ? src.repoUrl.trim() : "";
-    const packageJson = typeof src?.packageJson === "string" ? src.packageJson : "";
-    if (repoUrl || packageJson) return { repoUrl, packageJson };
-    const text = typeof src?.text === "string" ? src.text.trim() : "";
-    if (!text) return null;
-    if (/^https?:\/\/github\.com\/[\w.-]+\/[\w.-]+(?:\.git)?(?:\/tree\/[\w.\-/]+)?\/?$/i.test(text)) return { repoUrl: text };
-    if (text.startsWith("{")) {
-      try {
-        const o = JSON.parse(text);
-        if (o && typeof o === "object" && (o.dependencies || o.devDependencies || o.scripts || o.name)) return { packageJson: text };
-      } catch { /* not JSON → treat as scam text */ }
+  // Serve a pre-computed verdict for the fixed website example tiles (no engine
+  // call, no budget spent). Only plain-text requests can hit it — real attachments
+  // always go live. Placed before the demo limiter so cached clicks are free.
+  const demoCache = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (req.method === "POST" && req.body && typeof req.body === "object" && !(req.body as Record<string, unknown>).files) {
+      const text = typeof (req.body as Record<string, unknown>).text === "string" ? String((req.body as Record<string, unknown>).text).trim() : "";
+      const hit = text ? DEMO_CACHE.get(text) : undefined;
+      if (hit) {
+        res.setHeader("X-Demo-Cache", "hit");
+        return res.json(hit);
+      }
     }
-    return null;
+    next();
   };
 
   // One universal endpoint: dispatches to the repo or the scam engine.
@@ -170,10 +181,10 @@ async function main() {
 
   app.post("/x402/analyze", paidLimiter, check); // paid (x402-gated) — the one A2MCP endpoint
   app.get("/x402/analyze", paidLimiter, check); // paid (x402-gated) — GET probe / query-string callers
-  app.post("/try", demoLimiter, demoBudget, check); // free, rate-limited + daily budget — for the website
+  app.post("/try", demoCache, demoLimiter, demoBudget, check); // free — cached tiles first, then rate-limited + daily budget
   app.post("/x402/repo-analyze", paidLimiter, check); // paid alias (unlisted) — explicit repo route
   app.get("/x402/repo-analyze", paidLimiter, check); // paid alias — GET probe
-  app.post("/repo-try", demoLimiter, demoBudget, check); // free alias
+  app.post("/repo-try", demoCache, demoLimiter, demoBudget, check); // free alias
 
   app.use((_req, res) => res.status(404).json({ error: "Not found." }));
 
