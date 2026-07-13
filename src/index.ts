@@ -76,11 +76,14 @@ async function main() {
     }
     res.json({
       name: "Scaminja",
-      tagline: "Instant, evidence-backed scam / phishing / malicious-repo detection for humans and agents.",
-      services: [
-        { name: "Scam & Phishing Check", endpoint: "POST /x402/analyze", input: { text: "string", files: "[{kind:'image'|'pdf', base64, mediaType}] (optional)", typeHint: "string (optional)" } },
-        { name: "Repo & Dependency Check", endpoint: "POST /x402/repo-analyze", input: { repoUrl: "GitHub URL", packageJson: "string (either)" } },
-      ],
+      tagline: "One call: is this message, link, email, wallet, screenshot, PDF, or GitHub repo safe? Instant, evidence-backed Safe / Caution / Scam verdict.",
+      service: "Scaminja Safety Check",
+      endpoint: "POST /x402/analyze",
+      input: {
+        text: "string — a message/link/email/wallet, OR a GitHub repo URL, OR a package.json (auto-detected)",
+        files: "[{kind:'image'|'pdf', base64, mediaType}] (optional) — screenshots / PDFs",
+        typeHint: "string (optional)",
+      },
       price: `${process.env.PRICE ?? "$0.02"} per call`,
       network: "X Layer (eip155:196)",
       payments: PAYMENTS_ENABLED ? "x402 (A2MCP)" : "open (dev mode)",
@@ -89,12 +92,48 @@ async function main() {
 
   app.get("/health", (_req, res) => res.json({ ok: true }));
 
-  const analyzeHandler = async (req: express.Request, res: express.Response) => {
+  // A bare GitHub repo URL, or a package.json, routes to the supply-chain engine;
+  // everything else (message/link/email/wallet/screenshot/PDF) to the scam engine.
+  const asRepo = (src: Record<string, unknown>): { repoUrl?: string; packageJson?: string } | null => {
+    const repoUrl = typeof src?.repoUrl === "string" ? src.repoUrl.trim() : "";
+    const packageJson = typeof src?.packageJson === "string" ? src.packageJson : "";
+    if (repoUrl || packageJson) return { repoUrl, packageJson };
+    const text = typeof src?.text === "string" ? src.text.trim() : "";
+    if (!text) return null;
+    if (/^https?:\/\/github\.com\/[\w.-]+\/[\w.-]+(?:\.git)?(?:\/tree\/[\w.\-/]+)?\/?$/i.test(text)) return { repoUrl: text };
+    if (text.startsWith("{")) {
+      try {
+        const o = JSON.parse(text);
+        if (o && typeof o === "object" && (o.dependencies || o.devDependencies || o.scripts || o.name)) return { packageJson: text };
+      } catch { /* not JSON → treat as scam text */ }
+    }
+    return null;
+  };
+
+  // One universal endpoint: dispatches to the repo or the scam engine.
+  const check = async (req: express.Request, res: express.Response) => {
     const start = Date.now();
+    const src = (req.method === "GET" ? req.query : req.body) as Record<string, unknown>;
+
+    const repo = asRepo(src);
+    if (repo) {
+      if ((repo.packageJson ?? "").length > 300_000) return res.status(400).json({ error: "`packageJson` is too large." });
+      try {
+        const verdict = await analyzeRepo(repo);
+        closeBreaker();
+        console.log(`[repo] ${verdict.verdict} risk=${verdict.risk_score} ev=${verdict.evidence.length} ${Date.now() - start}ms`);
+        return res.json(verdict);
+      } catch (err) {
+        if (err instanceof RepoError) return res.json(cautionBody(err.message));
+        console.error(`[repo] failed after ${Date.now() - start}ms:`, err instanceof Error ? err.message : err);
+        if (isServiceUnavailableError(err)) tripBreaker(err instanceof Error ? err.message : "engine unavailable");
+        return res.status(503).json(cautionBody("We couldn't complete the check right now. Treat this as unverified and try again shortly."));
+      }
+    }
+
     let input;
     try {
-      // GET carries the input in the query string; POST in the JSON body.
-      input = validateInput(req.method === "GET" ? req.query : req.body);
+      input = validateInput(src);
     } catch (e) {
       if (e instanceof ValidationError) return res.status(400).json({ error: e.message });
       throw e;
@@ -105,40 +144,18 @@ async function main() {
       console.log(`[analyze] ${verdict.verdict} risk=${verdict.risk_score} ev=${verdict.evidence.length} ${Date.now() - start}ms`);
       res.json(verdict);
     } catch (err) {
-      // Log full detail server-side; never leak internal errors to the caller.
       console.error(`[analyze] failed after ${Date.now() - start}ms:`, err instanceof Error ? err.message : err);
       if (isServiceUnavailableError(err)) tripBreaker(err instanceof Error ? err.message : "engine unavailable");
       res.status(503).json(cautionBody("We couldn't complete the check right now. Treat this as unverified and try again shortly."));
     }
   };
 
-  // Second service: repo & dependency safety check.
-  const repoAnalyzeHandler = async (req: express.Request, res: express.Response) => {
-    const start = Date.now();
-    const src = (req.method === "GET" ? req.query : req.body) as Record<string, unknown>;
-    const repoUrl = typeof src?.repoUrl === "string" ? src.repoUrl.trim() : "";
-    const packageJson = typeof src?.packageJson === "string" ? src.packageJson : "";
-    if (!repoUrl && !packageJson) return res.status(400).json({ error: "Provide `repoUrl` (a GitHub URL) or `packageJson` (a pasted manifest)." });
-    if (packageJson.length > 300_000) return res.status(400).json({ error: "`packageJson` is too large." });
-    try {
-      const verdict = await analyzeRepo({ repoUrl, packageJson });
-      closeBreaker();
-      console.log(`[repo] ${verdict.verdict} risk=${verdict.risk_score} ev=${verdict.evidence.length} ${Date.now() - start}ms`);
-      res.json(verdict);
-    } catch (err) {
-      if (err instanceof RepoError) return res.json(cautionBody(err.message)); // expected input issue → friendly caution
-      console.error(`[repo] failed after ${Date.now() - start}ms:`, err instanceof Error ? err.message : err);
-      if (isServiceUnavailableError(err)) tripBreaker(err instanceof Error ? err.message : "engine unavailable");
-      res.status(503).json(cautionBody("We couldn't complete the repo check right now. Treat this as unverified and try again shortly."));
-    }
-  };
-
-  app.post("/x402/analyze", limiter, analyzeHandler); // paid (x402-gated) — for agents
-  app.get("/x402/analyze", limiter, analyzeHandler); // paid (x402-gated) — GET probe / query-string callers
-  app.post("/try", limiter, analyzeHandler); // free, rate-limited — for the website
-  app.post("/x402/repo-analyze", limiter, repoAnalyzeHandler); // paid (x402-gated) — repo safety, 2nd service
-  app.get("/x402/repo-analyze", limiter, repoAnalyzeHandler); // paid (x402-gated) — GET probe
-  app.post("/repo-try", limiter, repoAnalyzeHandler); // free, rate-limited — for the website
+  app.post("/x402/analyze", limiter, check); // paid (x402-gated) — the one A2MCP endpoint
+  app.get("/x402/analyze", limiter, check); // paid (x402-gated) — GET probe / query-string callers
+  app.post("/try", limiter, check); // free, rate-limited — for the website
+  app.post("/x402/repo-analyze", limiter, check); // paid alias (unlisted) — explicit repo route
+  app.get("/x402/repo-analyze", limiter, check); // paid alias — GET probe
+  app.post("/repo-try", limiter, check); // free alias
 
   app.use((_req, res) => res.status(404).json({ error: "Not found." }));
 

