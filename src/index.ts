@@ -43,7 +43,13 @@ async function main() {
   });
 
   app.use(express.json({ limit: "14mb" }));
-  app.use("/demo", express.static("public"));
+
+  // The website is the pre-rendered React/Vite build (web/dist). Static assets —
+  // hashed JS/CSS bundles, images, /demo/*, robots.txt, sitemap.xml — are served
+  // straight from there; index:false so "/" falls through to the content-negotiated
+  // handler below (browsers get HTML, agents get the JSON manifest).
+  const WEB_DIST = path.resolve("web/dist");
+  app.use(express.static(WEB_DIST, { index: false, maxAge: "1h" }));
 
   // Reject before the payment gate when the engine can't serve, so buyers are
   // never charged for a check we can't deliver.
@@ -72,7 +78,7 @@ async function main() {
   // Browsers get the landing page; agents/curl get the JSON manifest.
   app.get("/", (req, res) => {
     if ((req.headers.accept ?? "").includes("text/html")) {
-      return res.sendFile(path.resolve("public/index.html"));
+      return res.sendFile(path.join(WEB_DIST, "index.html"));
     }
     res.json({
       name: "Scaminja",

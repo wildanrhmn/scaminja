@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Scaminja — identity / logo options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#05070e; --ink:#eef2fb; --muted:#9aa3ba; --faint:#616981;
+    --line:rgba(255,255,255,.1); --surface:rgba(255,255,255,.03);
+    --cyan:#4fe3d0; --blue:#6f8dff; --violet:#a889ff;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:
+    radial-gradient(1000px 640px at 82% -10%,rgba(111,141,255,.14),transparent 58%),
+    radial-gradient(820px 620px at 4% 2%,rgba(79,227,208,.1),transparent 55%),var(--bg);
+    color:var(--ink);font:15px/1.6 "Inter",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  h1,h2,.disp{font-family:"Space Grotesk",sans-serif}
+  .wrap{max-width:1080px;margin:0 auto;padding:60px 22px 90px}
+  .kick{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--cyan);margin:0 0 10px}
+  h1{font-size:clamp(30px,5vw,46px);letter-spacing:-.03em;margin:0 0 14px;font-weight:700}
+  .lede{color:var(--muted);max-width:640px;margin:0 0 42px;font-size:15.5px}
+  .grid{display:grid;gap:16px;grid-template-columns:1fr}
+  @media(min-width:680px){.grid{grid-template-columns:1fr 1fr}}
+  .card{border:1px solid var(--line);background:var(--surface);border-radius:18px;padding:20px;cursor:pointer;transition:border-color .2s,background .2s;text-align:left;color:inherit;font:inherit}
+  .card:hover{border-color:rgba(79,227,208,.35)}
+  .card.sel{border-color:rgba(79,227,208,.6);background:rgba(79,227,208,.05)}
+  .card-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .card-top .name{font-family:"Space Grotesk";font-size:18px;font-weight:600;letter-spacing:-.01em}
+  .pill{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--line);color:var(--faint);border-radius:999px;padding:3px 9px}
+  .card.sel .pill{border-color:rgba(79,227,208,.5);color:var(--cyan)}
+  .sub{color:var(--muted);font-size:12.5px;line-height:1.55;margin:8px 0 0;min-height:52px}
+  .swatches{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+  .sw{height:118px;border-radius:13px;display:flex;align-items:center;justify-content:center}
+  .sw.dark{background:#080b13;border:1px solid var(--line)}
+  .sw.light{background:#eef0f4}
+  .sw.dark .mk{color:var(--cyan)}
+  .sw.light .mk{color:#0d1017}
+  .lock{margin-top:12px;display:flex;align-items:center;gap:11px;border:1px solid var(--line);background:#080b13;border-radius:13px;padding:12px 15px}
+  .lock .mk{color:var(--cyan)}
+  .lock .wm{font-family:"Space Grotesk";font-weight:700;font-size:17px;letter-spacing:-.01em}
+  .lock .sizes{margin-left:auto;display:flex;align-items:center;gap:12px;color:rgba(79,227,208,.7)}
+  .mk svg{display:block}
+  /* submission */
+  .sub-sec{margin-top:56px;border-top:1px solid var(--line);padding-top:38px}
+  .sub-sec h2{font-size:26px;letter-spacing:-.02em;margin:6px 0 6px;font-weight:700}
+  .sub-grid{display:grid;gap:26px;margin-top:26px;grid-template-columns:1fr}
+  @media(min-width:640px){.sub-grid{grid-template-columns:auto 1fr;align-items:start}}
+  .render{border:1px solid var(--line);border-radius:20px;overflow:hidden;width:320px;max-width:100%}
+  .render svg{display:block;width:100%;height:auto}
+  .btns{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px}
+  .btn{font:inherit;font-weight:600;font-size:14px;border-radius:11px;padding:11px 18px;cursor:pointer;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--ink);transition:.2s}
+  .btn:hover{border-color:rgba(79,227,208,.5)}
+  .btn.primary{background:#4f6bff;border-color:rgba(140,160,255,.55);color:#fff;box-shadow:0 0 30px rgba(79,107,255,.3)}
+  .note{color:var(--muted);font-size:13.5px;max-width:44ch;margin:0 0 10px}
+  code{font-family:var(--mono);color:var(--cyan);font-size:12.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="kick">Demo · branding</p>
+  <h1>Scaminja identity</h1>
+  <p class="lede">Five directions for the mark, all in the cyan-on-ink language of the site. Scaminja is a scam-detecting ninja, so every option plays on the shuriken / masked-ninja / scan motif while staying razor-sharp at favicon sizes. Pick one, export the 1024×1024 asset, and tell me the id — I'll wire it into the site header and favicon.</p>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="sub-sec">
+    <p class="kick" style="color:var(--faint)">Submission asset</p>
+    <h2 id="subTitle">— · 1024 × 1024</h2>
+    <p class="note">Ink base with a cyan / blue / violet glow, a faint dot grid, and the mark struck in a brand gradient at the center. Mark only — the “Scaminja” wordmark renders beside it in the app.</p>
+    <div class="sub-grid">
+      <div class="render" id="render"></div>
+      <div>
+        <p class="note">The export renders this exact composition to a 1024×1024 canvas. PNG for thumbnails / avatars / app stores, SVG for everything else. Current pick: <code id="pickId">—</code>.</p>
+        <div class="btns">
+          <button class="btn primary" id="dlPng">Download 1024 PNG</button>
+          <button class="btn" id="dlSvg">Download SVG</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---- marks: inner SVG on a 0 0 32 32 viewBox, using currentColor ----
+const MARKS = [
+  {
+    id:"shuriken",
+    name:"Shuriken",
+    sub:"The pure ninja throwing-star with a struck center hole. Bold, symmetric, unmistakable — reads perfectly at 16px.",
+    inner:`<path fill="currentColor" fill-rule="evenodd" d="M16 2 L19.8 12.2 L30 16 L19.8 19.8 L16 30 L12.2 19.8 L2 16 L12.2 12.2 Z M18.6 16 A2.6 2.6 0 1 0 13.4 16 A2.6 2.6 0 1 0 18.6 16 Z"/>`
+  },
+  {
+    id:"mask",
+    name:"Masked Ninja",
+    sub:"A wrapped headband with two focused eye-slits. The most characterful option — playful, watchful, instantly “ninja”.",
+    inner:`<path fill="currentColor" fill-rule="evenodd" d="M7.5 11 H24.5 A5 5 0 0 1 29.5 16 A5 5 0 0 1 24.5 21 H7.5 A5 5 0 0 1 2.5 16 A5 5 0 0 1 7.5 11 Z M8.8 14.5 L13.2 15.35 L13.2 17.5 L8.8 16.65 Z M23.2 14.5 L18.8 15.35 L18.8 17.5 L23.2 16.65 Z"/>`
+  },
+  {
+    id:"shield",
+    name:"Shield Star",
+    sub:"A protection shield holding a shuriken. Leans security-first — trust, defense, and the ninja star together.",
+    inner:`<path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M16 3 L27 7 V15.5 C27 22.4 22.2 26.8 16 29 C9.8 26.8 5 22.4 5 15.5 V7 Z"/><path fill="currentColor" d="M16 9.6 L17.7 13.9 L22 15.6 L17.7 17.3 L16 21.6 L14.3 17.3 L10 15.6 L14.3 13.9 Z"/>`
+  },
+  {
+    id:"scan",
+    name:"Scan Radar",
+    sub:"A shuriken locked inside a radar ring with a sweep. Says “detection” out loud — scanning every link and address.",
+    inner:`<circle cx="16" cy="16" r="13.4" fill="none" stroke="currentColor" stroke-width="1.6" opacity="0.55"/><circle cx="16" cy="16" r="9.6" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.32"/><path stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M16 16 L24.6 7.4"/><circle cx="24.6" cy="7.4" r="1.5" fill="currentColor"/><path fill="currentColor" d="M16 11.2 L17.4 14.6 L20.8 16 L17.4 17.4 L16 20.8 L14.6 17.4 L11.2 16 L14.6 14.6 Z"/>`
+  },
+  {
+    id:"verdict",
+    name:"Verdict Star",
+    sub:"An outlined shuriken with a bold check struck through it. Fuses the ninja star with the safe / scam verdict.",
+    inner:`<path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" opacity="0.55" d="M16 2 L19.8 12.2 L30 16 L19.8 19.8 L16 30 L12.2 19.8 L2 16 L12.2 12.2 Z"/><path fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" d="M11.3 16.4 L14.7 19.8 L20.9 12.2"/>`
+  },
+];
+
+const SIZES = [16,20,28];
+let selected = MARKS[0].id;
+
+const svgWrap = (inner,size) => `<svg class="i" width="${size}" height="${size}" viewBox="0 0 32 32" fill="none" aria-hidden="true">${inner}</svg>`;
+const mk = (inner,size)=>`<span class="mk">${svgWrap(inner,size)}</span>`;
+
+function renderGrid(){
+  document.getElementById("grid").innerHTML = MARKS.map(m=>`
+    <button class="card ${m.id===selected?'sel':''}" data-id="${m.id}">
+      <div class="card-top">
+        <span class="name">${m.name}</span>
+        <span class="pill">${m.id===selected?'selected':'select'}</span>
+      </div>
+      <p class="sub">${m.sub}</p>
+      <div class="swatches">
+        <div class="sw dark">${mk(m.inner,66)}</div>
+        <div class="sw light">${mk(m.inner,66)}</div>
+      </div>
+      <div class="lock">
+        ${mk(m.inner,26)}
+        <span class="wm">Scaminja</span>
+        <span class="sizes">${SIZES.map(s=>mk(m.inner,s)).join("")}</span>
+      </div>
+    </button>`).join("");
+  document.querySelectorAll(".card").forEach(c=>c.onclick=()=>{ selected=c.dataset.id; renderGrid(); renderSubmission(); });
+}
+
+function submissionSvg(id){
+  const m = MARKS.find(x=>x.id===id);
+  const inner = m.inner.replaceAll("currentColor","url(#scGrad)");
+  return `<svg id="subSvg" width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="scGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#5cf0dd"/><stop offset="52%" stop-color="#6f8dff"/><stop offset="100%" stop-color="#a889ff"/>
+    </linearGradient>
+    <radialGradient id="gBlue" cx="0.8" cy="0.12" r="0.7"><stop offset="0%" stop-color="#6f8dff" stop-opacity="0.34"/><stop offset="100%" stop-color="#6f8dff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="gCyan" cx="0.16" cy="0.1" r="0.7"><stop offset="0%" stop-color="#4fe3d0" stop-opacity="0.26"/><stop offset="100%" stop-color="#4fe3d0" stop-opacity="0"/></radialGradient>
+    <radialGradient id="gViolet" cx="0.5" cy="1.1" r="0.7"><stop offset="0%" stop-color="#a889ff" stop-opacity="0.28"/><stop offset="100%" stop-color="#a889ff" stop-opacity="0"/></radialGradient>
+    <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse"><path d="M64 0 H0 V64" fill="none" stroke="#ffffff" stroke-opacity="0.045" stroke-width="1"/></pattern>
+  </defs>
+  <rect width="1024" height="1024" rx="200" fill="#070a12"/>
+  <rect width="1024" height="1024" rx="200" fill="url(#grid)"/>
+  <rect width="1024" height="1024" rx="200" fill="url(#gBlue)"/>
+  <rect width="1024" height="1024" rx="200" fill="url(#gCyan)"/>
+  <rect width="1024" height="1024" rx="200" fill="url(#gViolet)"/>
+  <rect x="3" y="3" width="1018" height="1018" rx="197" fill="none" stroke="#ffffff" stroke-opacity="0.1" stroke-width="2"/>
+  <svg x="212" y="212" width="600" height="600" viewBox="0 0 32 32" fill="none">${inner}</svg>
+</svg>`;
+}
+
+function renderSubmission(){
+  const m = MARKS.find(x=>x.id===selected);
+  document.getElementById("subTitle").textContent = `${m.name} · 1024 × 1024`;
+  document.getElementById("pickId").textContent = m.id;
+  document.getElementById("render").innerHTML = submissionSvg(selected);
+}
+
+function serialize(){ return `<?xml version="1.0" encoding="UTF-8"?>` + new XMLSerializer().serializeToString(document.getElementById("subSvg")); }
+
+document.getElementById("dlSvg").onclick = ()=>{
+  const blob = new Blob([serialize()],{type:"image/svg+xml;charset=utf-8"});
+  const url = URL.createObjectURL(blob), a=document.createElement("a");
+  a.href=url; a.download=`scaminja-logo-${selected}-1024.svg`; a.click(); URL.revokeObjectURL(url);
+};
+document.getElementById("dlPng").onclick = async ()=>{
+  const blob = new Blob([serialize()],{type:"image/svg+xml;charset=utf-8"});
+  const url = URL.createObjectURL(blob), img = new Image();
+  await new Promise((res,rej)=>{img.onload=res;img.onerror=rej;img.src=url;});
+  const c=document.createElement("canvas"); c.width=c.height=1024;
+  c.getContext("2d").drawImage(img,0,0,1024,1024); URL.revokeObjectURL(url);
+  const a=document.createElement("a"); a.href=c.toDataURL("image/png"); a.download=`scaminja-logo-${selected}-1024.png`; a.click();
+};
+
+renderGrid();
+renderSubmission();
+</script>
+</body>
+</html>

@@ -10,6 +10,8 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.json",
+    "build:web": "npm --prefix web install && npm --prefix web run build",
+    "build:all": "npm run build:web && npm run build",
     "start": "node dist/index.js",
     "smoke": "tsx test/smoke.ts",
     "test": "vitest run"
