@@ -12,7 +12,7 @@ export interface PaymentLayer {
   initialize: () => Promise<void>;
 }
 
-export async function createPaymentLayer(routeKey: string): Promise<PaymentLayer> {
+export async function createPaymentLayer(routeKeys: string[]): Promise<PaymentLayer> {
   const cfg = loadPaymentConfig();
   assertPaymentConfig(cfg);
 
@@ -30,19 +30,19 @@ export async function createPaymentLayer(routeKey: string): Promise<PaymentLayer
 
   const resourceServer = new srv.x402ResourceServer(facilitatorClient).register(NETWORK, new evm.ExactEvmScheme());
 
-  const httpServer = new srv.x402HTTPResourceServer(resourceServer, {
-    [routeKey]: {
-      accepts: {
-        scheme: "exact",
-        network: NETWORK,
-        payTo: cfg.payTo,
-        price: cfg.price,
-        maxTimeoutSeconds: cfg.maxTimeoutSeconds,
-        // USDT0 isn't in OKX's task-system token list, so advertise its decimals.
-        extra: { decimals: USDT0_DECIMALS },
-      },
-    },
-  });
+  // Same accepts on every gated route. We gate both GET and POST /analyze because
+  // OKX's x402-check (and buyer agents) probe GET, while our own callers POST.
+  const accepts = {
+    scheme: "exact",
+    network: NETWORK,
+    payTo: cfg.payTo,
+    price: cfg.price,
+    maxTimeoutSeconds: cfg.maxTimeoutSeconds,
+    // USDT0 isn't in OKX's task-system token list, so advertise its decimals.
+    extra: { decimals: USDT0_DECIMALS },
+  };
+  const routes = Object.fromEntries(routeKeys.map((k) => [k, { accepts }]));
+  const httpServer = new srv.x402HTTPResourceServer(resourceServer, routes);
 
   // 4th arg false = disable the SDK's fire-and-forget facilitator sync (its
   // rejection is uncatchable). We run initialize() ourselves, guarded, in index.ts.

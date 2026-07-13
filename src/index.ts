@@ -9,7 +9,7 @@ import { isBreakerOpen, tripBreaker, closeBreaker, isServiceUnavailableError } f
 
 const PORT = Number(process.env.PORT ?? 8080);
 const PAYMENTS_ENABLED = process.env.PAYMENTS_ENABLED === "true";
-const ROUTE_KEY = "POST /analyze";
+const ROUTE_KEYS = ["POST /analyze", "GET /analyze"];
 
 // On any engine failure we return CAUTION, never a false "safe".
 function cautionBody(summary: string) {
@@ -45,7 +45,7 @@ async function main() {
   // Reject before the payment gate when the engine can't serve, so buyers are
   // never charged for a check we can't deliver.
   app.use((req, res, next) => {
-    if (req.method === "POST" && (req.path === "/analyze" || req.path === "/try") && isBreakerOpen()) {
+    if ((req.path === "/analyze" || req.path === "/try") && (req.method === "POST" || req.method === "GET") && isBreakerOpen()) {
       return res
         .status(503)
         .set("Retry-After", "120")
@@ -56,7 +56,7 @@ async function main() {
 
   let paymentLayer: Awaited<ReturnType<typeof createPaymentLayer>> | null = null;
   if (PAYMENTS_ENABLED) {
-    paymentLayer = await createPaymentLayer(ROUTE_KEY);
+    paymentLayer = await createPaymentLayer(ROUTE_KEYS);
     app.use(paymentLayer.middleware);
   }
 
@@ -88,7 +88,8 @@ async function main() {
     const start = Date.now();
     let input;
     try {
-      input = validateInput(req.body);
+      // GET carries the input in the query string; POST in the JSON body.
+      input = validateInput(req.method === "GET" ? req.query : req.body);
     } catch (e) {
       if (e instanceof ValidationError) return res.status(400).json({ error: e.message });
       throw e;
@@ -107,6 +108,7 @@ async function main() {
   };
 
   app.post("/analyze", limiter, analyzeHandler); // paid (x402-gated) — for agents
+  app.get("/analyze", limiter, analyzeHandler); // paid (x402-gated) — GET probe / query-string callers
   app.post("/try", limiter, analyzeHandler); // free, rate-limited — for the website
 
   app.use((_req, res) => res.status(404).json({ error: "Not found." }));
