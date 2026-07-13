@@ -14,6 +14,7 @@ type Verdict = {
   red_flags?: { label: string; detail: string; severity: Sev }[];
   recommended_actions?: string[];
   evidence?: { claim: string; source: string; severity: Sev }[];
+  limit_reached?: boolean;
 };
 type OutState = { status: "idle" | "loading" | "error" | "done"; error?: string; verdict?: Verdict };
 
@@ -35,6 +36,9 @@ export default function TryConsole() {
   const [atts, setAtts] = useState<Attachment[]>([]);
   const [out, setOut] = useState<OutState>({ status: "idle" });
   const [drop, setDrop] = useState(false);
+  const [locked, setLocked] = useState(false); // free daily demo budget exhausted
+  const busy = out.status === "loading";
+  const disabled = busy || locked;
   const consoleRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const goRef = useRef<HTMLButtonElement>(null);
@@ -43,6 +47,7 @@ export default function TryConsole() {
 
   // ---- attachments ----
   function addFiles(list: FileList | File[] | null | undefined) {
+    if (disabled) return;
     [...(list || [])].forEach((f) => {
       if (f.type.startsWith("image/")) loadImage(f);
       else if (f.type === "application/pdf") loadPdf(f);
@@ -125,6 +130,7 @@ export default function TryConsole() {
   }, [out]);
 
   async function check(overrideText?: string) {
+    if (disabled) return;
     const t = (overrideText ?? text).trim();
     if (!t && !atts.length) return;
     setOut({ status: "loading" });
@@ -134,14 +140,22 @@ export default function TryConsole() {
       if (atts.length) body.files = atts.map((a) => ({ kind: a.kind, base64: a.base64, mediaType: a.mediaType }));
       const r = await fetch("/try", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
       const v: Verdict = await r.json();
-      if (v.error && !v.verdict) setOut({ status: "error", error: v.error });
-      else setOut({ status: "done", verdict: v });
+      if (v.limit_reached) {
+        // Daily free-demo budget hit — lock the console until reload.
+        setLocked(true);
+        setOut({ status: "error", error: v.error || "The free demo has reached today's limit." });
+      } else if (v.error && !v.verdict) {
+        setOut({ status: "error", error: v.error });
+      } else {
+        setOut({ status: "done", verdict: v });
+      }
     } catch (e) {
       setOut({ status: "error", error: `Couldn't reach the analyzer. ${(e as Error)?.message || e}` });
     }
   }
 
   function runScenario(v: string) {
+    if (disabled) return;
     setAtts([]);
     setText(v);
     check(v);
@@ -165,7 +179,7 @@ export default function TryConsole() {
         <span className="console-live"><span className="dot" /> Live</span>
       </div>
       <div className="console-body">
-        <textarea id="in" value={text} onChange={(e) => setText(e.target.value)}
+        <textarea id="in" value={text} onChange={(e) => setText(e.target.value)} disabled={disabled}
           placeholder="Paste a message, link, email, wallet address, GitHub repo URL, or package.json — or drop / paste a screenshot or PDF…" />
         {atts.length > 0 && (
           <div className="atts">
@@ -181,16 +195,18 @@ export default function TryConsole() {
         <input type="file" ref={fileRef} accept="image/png,image/jpeg,image/webp,image/gif,application/pdf" multiple hidden
           onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }} />
         <div className="row">
-          <button className="btn btn-primary" ref={goRef} onClick={() => check()} disabled={out.status === "loading"}>
-            <span className="lbl">Check it</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+          <button className="btn btn-primary" ref={goRef} onClick={() => check()} disabled={disabled}>
+            <span className="lbl">{locked ? "Daily limit reached" : busy ? "Checking…" : "Check it"}</span>
+            {!locked && (busy
+              ? <span className="spinner" />
+              : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>)}
           </button>
-          <button className="btn ghost" type="button" onClick={() => fileRef.current?.click()}>📎 Attach</button>
+          <button className="btn ghost" type="button" onClick={() => fileRef.current?.click()} disabled={disabled}>📎 Attach</button>
           <span className="tag">Screenshots &amp; PDFs · free · nothing stored</span>
         </div>
         <div className="scenarios">
           {SCENARIOS.map((sc) => (
-            <button className="scen" key={sc.t} onClick={() => runScenario(sc.v)}>
+            <button className="scen" key={sc.t} onClick={() => runScenario(sc.v)} disabled={disabled}>
               <span className="si">{sc.i}</span><b>{sc.t}</b><small>{sc.s}</small>
             </button>
           ))}
@@ -199,7 +215,11 @@ export default function TryConsole() {
           {out.status === "loading" && (
             <p className="tag" style={{ marginTop: 16 }}><span className="spinner" />{atts.length ? "Reading attachment(s) & analyzing…" : "Analyzing…"}</p>
           )}
-          {out.status === "error" && <p className="err" style={{ marginTop: 14 }}>{out.error}</p>}
+          {out.status === "error" && (
+            locked
+              ? <p className="notice" style={{ marginTop: 16 }}>⏳ {out.error}</p>
+              : <p className="err" style={{ marginTop: 14 }}>{out.error}</p>
+          )}
           {out.status === "done" && out.verdict && <VerdictCard v={out.verdict} />}
         </div>
       </div>

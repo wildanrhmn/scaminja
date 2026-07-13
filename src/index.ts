@@ -3,7 +3,7 @@ import path from "node:path";
 import express from "express";
 import { analyze } from "./engine/analyze.js";
 import { validateInput, ValidationError } from "./security/validate.js";
-import { rateLimiter } from "./security/rateLimit.js";
+import { rateLimiter, dailyBudget } from "./security/rateLimit.js";
 import { createPaymentLayer } from "./payment/x402.js";
 import { isBreakerOpen, tripBreaker, closeBreaker, isServiceUnavailableError } from "./breaker.js";
 import { analyzeRepo } from "./repo/analyze.js";
@@ -69,11 +69,23 @@ async function main() {
     app.use(paymentLayer.middleware);
   }
 
-  const limiter = rateLimiter({
-    windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS ?? 600_000),
+  const windowMs = Number(process.env.RATE_LIMIT_WINDOW_MS ?? 600_000);
+
+  // Paid x402 callers cover their own Claude cost, so they get a lenient limiter.
+  const paidLimiter = rateLimiter({
+    windowMs,
     maxPerIp: Number(process.env.RATE_LIMIT_MAX ?? 20),
-    maxGlobal: Number(process.env.RATE_LIMIT_GLOBAL_MAX ?? 100),
+    maxGlobal: Number(process.env.RATE_LIMIT_GLOBAL_MAX ?? 200),
   });
+
+  // The free website demo spends OUR balance, so it gets a tighter per-IP/global
+  // limiter plus a hard daily budget (kill-switch) on top.
+  const demoLimiter = rateLimiter({
+    windowMs,
+    maxPerIp: Number(process.env.DEMO_RATE_MAX ?? 5),
+    maxGlobal: Number(process.env.DEMO_RATE_GLOBAL_MAX ?? 40),
+  });
+  const demoBudget = dailyBudget({ max: Number(process.env.DAILY_FREE_MAX ?? 500) });
 
   // Browsers get the landing page; agents/curl get the JSON manifest.
   app.get("/", (req, res) => {
@@ -156,12 +168,12 @@ async function main() {
     }
   };
 
-  app.post("/x402/analyze", limiter, check); // paid (x402-gated) — the one A2MCP endpoint
-  app.get("/x402/analyze", limiter, check); // paid (x402-gated) — GET probe / query-string callers
-  app.post("/try", limiter, check); // free, rate-limited — for the website
-  app.post("/x402/repo-analyze", limiter, check); // paid alias (unlisted) — explicit repo route
-  app.get("/x402/repo-analyze", limiter, check); // paid alias — GET probe
-  app.post("/repo-try", limiter, check); // free alias
+  app.post("/x402/analyze", paidLimiter, check); // paid (x402-gated) — the one A2MCP endpoint
+  app.get("/x402/analyze", paidLimiter, check); // paid (x402-gated) — GET probe / query-string callers
+  app.post("/try", demoLimiter, demoBudget, check); // free, rate-limited + daily budget — for the website
+  app.post("/x402/repo-analyze", paidLimiter, check); // paid alias (unlisted) — explicit repo route
+  app.get("/x402/repo-analyze", paidLimiter, check); // paid alias — GET probe
+  app.post("/repo-try", demoLimiter, demoBudget, check); // free alias
 
   app.use((_req, res) => res.status(404).json({ error: "Not found." }));
 

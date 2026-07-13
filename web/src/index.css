@@ -100,6 +100,11 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 0
 .scen small{display:block;color:var(--faint);font-size:10.5px;margin-top:3px;font-family:var(--mono);letter-spacing:.02em}
 .btn.ghost{background:transparent;border-color:var(--line);color:var(--muted);padding:13px 16px}
 .btn.ghost:hover{color:var(--ink);border-color:rgba(79,227,208,.5)}
+.btn.btn-primary:disabled{background:var(--surface2);border-color:var(--line);color:var(--muted)}
+textarea:disabled{opacity:.6;cursor:not-allowed}
+.scen:disabled{opacity:.5;cursor:not-allowed;pointer-events:none}
+.notice{display:flex;align-items:flex-start;gap:8px;font-size:13.5px;line-height:1.55;color:var(--label);
+  border:1px solid var(--line);border-radius:12px;padding:13px 15px;background:rgba(111,141,255,.06)}
 .atts{margin-top:12px;display:flex;flex-wrap:wrap;gap:10px}
 .att{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:8px 10px;background:rgba(255,255,255,.03);max-width:250px}
 .att img{width:44px;height:44px;object-fit:cover;border-radius:7px;flex:0 0 auto;border:1px solid var(--line)}
