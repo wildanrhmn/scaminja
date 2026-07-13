@@ -63,36 +63,70 @@ function typosquatSignals(pkg: any): Evidence[] {
   return out;
 }
 
-async function osvSignals(names: string[]): Promise<Evidence[]> {
-  if (!names.length) return [];
+async function registryLatest(name: string): Promise<string | null> {
+  const url = "https://registry.npmjs.org/" + (name.startsWith("@") ? name.replace("/", "%2F") : name);
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), OSV_TIMEOUT);
   try {
-    const res = await fetch("https://api.osv.dev/v1/querybatch", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ queries: names.map((name) => ({ package: { ecosystem: "npm", name } })) }),
-      signal: ctrl.signal,
-    });
-    if (!res.ok) return [];
-    const data: any = await res.json();
-    const out: Evidence[] = [];
-    (data?.results ?? []).forEach((r: any, i: number) => {
-      const vulns: any[] = r?.vulns ?? [];
-      if (!vulns.length) return;
-      const mal = vulns.filter((v) => String(v.id).toUpperCase().startsWith("MAL"));
-      if (mal.length) {
-        out.push({ claim: `Dependency "${names[i]}" is flagged MALICIOUS in the OSV database (${mal.slice(0, 3).map((v) => v.id).join(", ")})`, source: "OSV.dev", kind: "verified", severity: "high", subject: names[i] });
-      } else {
-        out.push({ claim: `Dependency "${names[i]}" has ${vulns.length} known security advisor${vulns.length > 1 ? "ies" : "y"} (${vulns.slice(0, 3).map((v) => v.id).join(", ")})`, source: "OSV.dev", kind: "verified", severity: "medium", subject: names[i] });
-      }
-    });
-    return out;
+    const r = await fetch(url, { signal: ctrl.signal, headers: { "user-agent": "scaminja" } });
+    if (!r.ok) return null;
+    const j: any = await r.json();
+    return j?.["dist-tags"]?.latest ?? null;
   } catch {
-    return [];
+    return null;
   } finally {
     clearTimeout(t);
   }
+}
+
+// Only report actual MALWARE (OSV "MAL-" advisories), queried against the resolved
+// latest version, and skip well-known packages. Generic CVEs are npm-audit noise —
+// a repo full of deps with old CVEs is normal and must NOT read as "malicious".
+async function osvSignals(pkg: any): Promise<Evidence[]> {
+  const registryDeps = Object.entries(allDeps(pkg))
+    .filter(([n, v]) =>
+      typeof v === "string" &&
+      !/^(git\+|git:|https?:|github:|file:|link:|\/\/)/i.test(v) &&
+      !POPULAR.has(n) &&
+      !n.startsWith("@types/"),
+    )
+    .map(([n]) => n)
+    .slice(0, 40);
+  if (!registryDeps.length) return [];
+
+  const out: Evidence[] = [];
+  const resolved = await Promise.all(registryDeps.map(async (name) => ({ name, version: await registryLatest(name) })));
+  resolved
+    .filter((x) => !x.version)
+    .forEach((x) => out.push({ claim: `Dependency "${x.name}" is not published on the npm registry — verify it isn't a placeholder for a malicious tarball`, source: "npm registry", kind: "verified", severity: "medium", subject: x.name }));
+
+  const queries = resolved.filter((x) => x.version).map((x) => ({ package: { ecosystem: "npm", name: x.name }, version: x.version! }));
+  if (queries.length) {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), OSV_TIMEOUT);
+    try {
+      const res = await fetch("https://api.osv.dev/v1/querybatch", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ queries }),
+        signal: ctrl.signal,
+      });
+      if (res.ok) {
+        const data: any = await res.json();
+        (data?.results ?? []).forEach((r: any, i: number) => {
+          const mal = (r?.vulns ?? []).filter((v: any) => String(v.id).toUpperCase().startsWith("MAL"));
+          if (mal.length) {
+            out.push({ claim: `Dependency "${queries[i].package.name}@${queries[i].version}" is flagged MALICIOUS in the OSV database (${mal.slice(0, 3).map((v: any) => v.id).join(", ")})`, source: "OSV.dev", kind: "verified", severity: "high", subject: queries[i].package.name });
+          }
+        });
+      }
+    } catch {
+      /* best-effort */
+    } finally {
+      clearTimeout(t);
+    }
+  }
+  return out;
 }
 
 function metaSignals(meta: { createdAt?: string; stars?: number } | null): Evidence[] {
@@ -111,7 +145,7 @@ function factsBlock(evidence: Evidence[]): string {
 export async function analyzeRepo(input: { repoUrl?: string; packageJson?: string }): Promise<ScamVerdict> {
   const { pkg, raw, source, meta } = await loadManifest(input);
 
-  const osv = await osvSignals(Object.keys(allDeps(pkg)));
+  const osv = await osvSignals(pkg);
   const evidence: Evidence[] = [
     ...scriptSignals(pkg),
     ...depSourceSignals(pkg),
