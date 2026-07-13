@@ -113,6 +113,17 @@
   .scen .si{font-size:19px;line-height:1}
   .scen b{display:block;font-size:13px;font-weight:600;margin-top:9px}
   .scen small{display:block;color:var(--faint);font-size:10.5px;margin-top:3px;font-family:var(--mono);letter-spacing:.02em}
+  .btn.ghost{background:transparent;border-color:var(--line);color:var(--muted);padding:13px 16px}
+  .btn.ghost:hover{color:var(--ink);border-color:rgba(79,227,208,.5)}
+  .imgprev{margin-top:12px;display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.03)}
+  .imgprev img{width:54px;height:54px;object-fit:cover;border-radius:8px;flex:0 0 auto;border:1px solid var(--line)}
+  .imgprev .meta{font-size:13px;color:var(--muted);flex:1;min-width:0}
+  .imgprev .meta b{color:var(--ink);display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .imgprev .rm{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:6px 11px;cursor:pointer;font:inherit;font-size:12px;flex:0 0 auto}
+  .imgprev .rm:hover{color:var(--scam);border-color:rgba(255,84,104,.6)}
+  .console.drop{border-color:rgba(79,227,208,.6);box-shadow:0 0 0 3px rgba(79,227,208,.14)}
+  .console.drop::after{content:"Drop screenshot to scan";position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);background:rgba(5,7,14,.72);border-radius:inherit;pointer-events:none}
   .card{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 40px 120px -50px rgba(0,0,0,.9);backdrop-filter:blur(16px);overflow:hidden}
   .card::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(440px circle at var(--mx,50%) var(--my,0%),rgba(79,227,208,.12),transparent 46%)}
   .card:hover::before{opacity:1}
@@ -291,9 +302,12 @@
         <span class="console-live"><span class="dot"></span> Live</span>
       </div>
       <div class="console-body">
-        <textarea id="in" placeholder="Paste a suspicious text, link, email, or wallet address…"></textarea>
+        <textarea id="in" placeholder="Paste a suspicious text, link, email, or wallet address — or drop / paste a screenshot…"></textarea>
+        <div id="imgprev" class="imgprev" hidden></div>
+        <input type="file" id="imgfile" accept="image/png,image/jpeg,image/webp,image/gif" hidden />
         <div class="row">
           <button class="btn btn-primary" id="go"><span class="lbl">Check it</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+          <button class="btn ghost" id="imgbtn" type="button">📷 Screenshot</button>
           <span class="tag">Free · no account · nothing stored</span>
         </div>
         <div class="scenarios">
@@ -365,16 +379,50 @@ const ANALYZE = (base || "") + "/try";
 const COLOR = { safe:"var(--safe)", caution:"var(--caution)", scam:"var(--scam)" };
 const esc = s => String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
-document.querySelectorAll(".scen").forEach(c => c.onclick = () => { inp.value = c.dataset.s; check(); inp.scrollIntoView({block:"nearest"}); });
+document.querySelectorAll(".scen").forEach(c => c.onclick = () => { clearImage(); inp.value = c.dataset.s; check(); inp.scrollIntoView({block:"nearest"}); });
 go.onclick = check;
+
+/* ---- screenshot: upload / drop / paste → downscaled base64 ---- */
+const imgfile = $("#imgfile"), imgbtn = $("#imgbtn"), imgprev = $("#imgprev"), consoleEl = $("#checker");
+let imageData = null, imageMime = null;
+imgbtn.onclick = () => imgfile.click();
+imgfile.onchange = () => { if(imgfile.files[0]) loadImage(imgfile.files[0]); imgfile.value = ""; };
+
+function loadImage(file){
+  if(!/^image\/(png|jpe?g|webp|gif)$/.test(file.type)){ alert("Please choose a PNG, JPG, WebP, or GIF image."); return; }
+  const url = URL.createObjectURL(file), img = new Image();
+  img.onload = () => {
+    const max = 1600, scale = Math.min(1, max/Math.max(img.width, img.height));
+    const w = Math.round(img.width*scale), h = Math.round(img.height*scale);
+    const c = document.createElement("canvas"); c.width = w; c.height = h;
+    c.getContext("2d").drawImage(img, 0, 0, w, h);
+    const dataUrl = c.toDataURL("image/jpeg", 0.92);
+    imageData = dataUrl.split(",")[1]; imageMime = "image/jpeg";
+    URL.revokeObjectURL(url);
+    imgprev.hidden = false;
+    imgprev.innerHTML = `<img src="${dataUrl}" alt=""><span class="meta"><b>${esc(file.name||"screenshot")}</b>${w}×${h} · ready to scan</span><button class="rm" type="button">Remove</button>`;
+    imgprev.querySelector(".rm").onclick = clearImage;
+  };
+  img.onerror = () => { alert("Couldn't read that image."); URL.revokeObjectURL(url); };
+  img.src = url;
+}
+function clearImage(){ imageData = null; imageMime = null; imgprev.hidden = true; imgprev.innerHTML = ""; }
+
+["dragover","dragenter"].forEach(ev => consoleEl.addEventListener(ev, e => { e.preventDefault(); consoleEl.classList.add("drop"); }));
+["dragleave","drop"].forEach(ev => consoleEl.addEventListener(ev, e => { e.preventDefault(); if(ev!=="dragleave"||!consoleEl.contains(e.relatedTarget)) consoleEl.classList.remove("drop"); }));
+consoleEl.addEventListener("drop", e => { const f = [...(e.dataTransfer?.files||[])].find(f => f.type.startsWith("image/")); if(f) loadImage(f); });
+addEventListener("paste", e => { const it = [...(e.clipboardData?.items||[])].find(i => i.type.startsWith("image/")); if(it){ const f = it.getAsFile(); if(f) loadImage(f); } });
 
 async function check(){
   const text = inp.value.trim();
-  if(!text) return;
+  if(!text && !imageData) return;
   go.disabled = true;
-  out.innerHTML = `<p class="tag" style="margin-top:16px"><span class="spinner"></span>Analyzing…</p>`;
+  out.innerHTML = `<p class="tag" style="margin-top:16px"><span class="spinner"></span>${imageData ? "Reading screenshot &amp; analyzing…" : "Analyzing…"}</p>`;
   try{
-    const r = await fetch(ANALYZE, {method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({text})});
+    const body = {};
+    if(text) body.text = text;
+    if(imageData){ body.imageBase64 = imageData; body.imageMediaType = imageMime; }
+    const r = await fetch(ANALYZE, {method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
     render(await r.json());
   }catch(e){ out.innerHTML = `<p class="err" style="margin-top:14px">Couldn't reach the analyzer. ${esc(e.message||e)}</p>`; }
   finally{ go.disabled = false; }

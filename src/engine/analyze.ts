@@ -7,7 +7,37 @@ import type { Evidence } from "../enrich/types.js";
 import type { AnalyzeInput } from "../types.js";
 
 const MODEL = process.env.MODEL ?? "claude-sonnet-5";
+const OCR_MODEL = process.env.OCR_MODEL ?? "claude-haiku-4-5";
 const TIMEOUT_MS = Number(process.env.ANALYZE_TIMEOUT_MS ?? 45_000);
+
+// Pull the visible text + any URLs/addresses/emails out of a screenshot so the
+// same live-source validators that run on pasted text can run on images too.
+async function transcribeImage(imageBase64: string, mediaType: string): Promise<string> {
+  try {
+    const r = await getClient().messages.create(
+      {
+        model: OCR_MODEL,
+        max_tokens: 700,
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "image", source: { type: "base64", media_type: mediaType as any, data: imageBase64 } },
+              {
+                type: "text",
+                text: "Transcribe ALL text visible in this image verbatim, and separately list every URL, domain, email address, crypto wallet/token address, and phone number shown. Output only the raw extracted text — no commentary.",
+              },
+            ],
+          },
+        ],
+      },
+      { timeout: 20_000 },
+    );
+    return r.content.map((b: any) => (b.type === "text" ? b.text : "")).join("\n").trim();
+  } catch {
+    return "";
+  }
+}
 
 export interface ScamVerdict extends Verdict {
   evidence: Evidence[];
@@ -35,7 +65,14 @@ export async function analyze(input: AnalyzeInput): Promise<ScamVerdict> {
   const hasImage = !!input.imageBase64;
   if (!hasText && !hasImage) throw new Error("Provide `text` and/or `imageBase64` to analyze.");
 
-  const { evidence } = hasText ? await enrich(input.text!) : { evidence: [] as Evidence[] };
+  // Enrich runs on text; for screenshots we first transcribe the image so the
+  // URLs/addresses inside it get validated against live sources too.
+  let enrichSource = input.text?.trim() ?? "";
+  if (hasImage) {
+    const transcript = await transcribeImage(input.imageBase64!, input.imageMediaType ?? "image/png");
+    if (transcript) enrichSource = enrichSource ? `${enrichSource}\n${transcript}` : transcript;
+  }
+  const evidence: Evidence[] = enrichSource ? (await enrich(enrichSource)).evidence : [];
 
   const content: Anthropic.ContentBlockParam[] = [];
   if (hasImage) {
