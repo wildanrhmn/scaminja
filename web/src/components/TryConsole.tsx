@@ -213,7 +213,7 @@ export default function TryConsole() {
         </div>
         <p className="scen-note">
           <span className="bang">!</span>
-          <span>These six examples are <b>pre-generated</b> for an instant, free preview. Paste anything of your own above — a message, link, wallet, screenshot, PDF, or GitHub repo — and Scaminja runs a <b>real, live check</b> on it.</span>
+          <span>These 6 examples are <b>pre-generated</b> — paste your own above for a <b>real, live check</b>.</span>
         </p>
         <div className="out" ref={outRef}>
           {out.status === "loading" && (
