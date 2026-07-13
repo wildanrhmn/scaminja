@@ -98,6 +98,10 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 0
 .scen .si{font-size:19px;line-height:1}
 .scen b{display:block;font-size:13px;font-weight:600;margin-top:9px}
 .scen small{display:block;color:var(--faint);font-size:10.5px;margin-top:3px;font-family:var(--mono);letter-spacing:.02em}
+.scen-note{display:flex;align-items:flex-start;gap:9px;margin:14px 0 0;font-size:12.5px;line-height:1.55;color:var(--faint)}
+.scen-note b{color:var(--muted);font-weight:600}
+.scen-note .bang{flex:0 0 auto;width:17px;height:17px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:11px;font-weight:600;line-height:1;color:var(--caution);border:1px solid rgba(245,181,68,.5);margin-top:1px}
 .btn.ghost{background:transparent;border-color:var(--line);color:var(--muted);padding:13px 16px}
 .btn.ghost:hover{color:var(--ink);border-color:rgba(79,227,208,.5)}
 .btn.btn-primary:disabled{background:var(--surface2);border-color:var(--line);color:var(--muted)}
